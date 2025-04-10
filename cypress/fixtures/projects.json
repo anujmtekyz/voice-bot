@@ -1,0 +1,56 @@
+[
+  {
+    "id": "PRJ-001",
+    "key": "VBOT",
+    "name": "Voice Bot",
+    "description": "Voice assistant for JIRA workflow automation",
+    "lead": {
+      "id": "usr_123456789",
+      "name": "Test User",
+      "email": "test@example.com"
+    },
+    "status": "active",
+    "category": "Development",
+    "createdAt": "2023-06-10T14:25:00.000Z",
+    "lastUpdated": "2023-09-20T16:42:00.000Z",
+    "issueCount": 87,
+    "issueTypes": ["Story", "Bug", "Task", "Epic"],
+    "avatarUrl": "https://company.atlassian.net/secure/projectavatar?pid=10000"
+  },
+  {
+    "id": "PRJ-002",
+    "key": "DASH",
+    "name": "Dashboard Redesign",
+    "description": "UI/UX improvements for the analytics dashboard",
+    "lead": {
+      "id": "usr_987654321",
+      "name": "Jane Smith",
+      "email": "jane@example.com"
+    },
+    "status": "active",
+    "category": "Design",
+    "createdAt": "2023-07-05T09:15:00.000Z",
+    "lastUpdated": "2023-09-19T11:30:00.000Z",
+    "issueCount": 42,
+    "issueTypes": ["Story", "Task", "Epic"],
+    "avatarUrl": "https://company.atlassian.net/secure/projectavatar?pid=10001"
+  },
+  {
+    "id": "PRJ-003",
+    "key": "API",
+    "name": "API Integration",
+    "description": "External API integration services",
+    "lead": {
+      "id": "usr_123456789",
+      "name": "Test User",
+      "email": "test@example.com"
+    },
+    "status": "planning",
+    "category": "Development",
+    "createdAt": "2023-08-20T13:45:00.000Z",
+    "lastUpdated": "2023-09-15T14:20:00.000Z",
+    "issueCount": 23,
+    "issueTypes": ["Story", "Bug", "Task"],
+    "avatarUrl": "https://company.atlassian.net/secure/projectavatar?pid=10002"
+  }
+] 

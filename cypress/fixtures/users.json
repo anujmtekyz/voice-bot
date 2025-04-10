@@ -1,0 +1,187 @@
+[
+  {
+    "id": "usr_123456789",
+    "name": "Test User",
+    "email": "test@example.com",
+    "avatarUrl": "https://secure.gravatar.com/avatar/123456?d=identicon",
+    "role": "Admin",
+    "title": "Senior Software Engineer",
+    "department": "Engineering",
+    "location": "New York",
+    "created": "2023-01-10T08:30:00.000Z",
+    "lastLogin": "2023-09-18T09:45:00.000Z",
+    "status": "Active",
+    "preferences": {
+      "theme": "dark",
+      "notifications": {
+        "email": true,
+        "push": true,
+        "slack": true
+      },
+      "dashboard": {
+        "defaultView": "kanban",
+        "recentProjects": ["PRJ-001", "PRJ-003"]
+      }
+    },
+    "projectRoles": [
+      {
+        "projectId": "PRJ-001",
+        "projectKey": "VBOT",
+        "role": "Owner"
+      },
+      {
+        "projectId": "PRJ-003",
+        "projectKey": "AUTH",
+        "role": "Developer"
+      }
+    ],
+    "skills": ["JavaScript", "TypeScript", "NestJS", "React", "AWS"]
+  },
+  {
+    "id": "usr_456789123",
+    "name": "Alex Johnson",
+    "email": "alex@example.com",
+    "avatarUrl": "https://secure.gravatar.com/avatar/456789?d=identicon",
+    "role": "Manager",
+    "title": "Project Manager",
+    "department": "Product",
+    "location": "San Francisco",
+    "created": "2023-02-15T10:20:00.000Z",
+    "lastLogin": "2023-09-17T14:30:00.000Z",
+    "status": "Active",
+    "preferences": {
+      "theme": "light",
+      "notifications": {
+        "email": true,
+        "push": false,
+        "slack": true
+      },
+      "dashboard": {
+        "defaultView": "list",
+        "recentProjects": ["PRJ-001", "PRJ-002"]
+      }
+    },
+    "projectRoles": [
+      {
+        "projectId": "PRJ-001",
+        "projectKey": "VBOT",
+        "role": "Manager"
+      },
+      {
+        "projectId": "PRJ-002",
+        "projectKey": "DASH",
+        "role": "Manager"
+      }
+    ],
+    "skills": ["Agile", "Scrum", "JIRA", "Project Planning", "Team Leadership"]
+  },
+  {
+    "id": "usr_987654321",
+    "name": "Jane Smith",
+    "email": "jane@example.com",
+    "avatarUrl": "https://secure.gravatar.com/avatar/987654?d=identicon",
+    "role": "Developer",
+    "title": "Frontend Developer",
+    "department": "Engineering",
+    "location": "Remote",
+    "created": "2023-03-05T09:15:00.000Z",
+    "lastLogin": "2023-09-18T08:20:00.000Z",
+    "status": "Active",
+    "preferences": {
+      "theme": "system",
+      "notifications": {
+        "email": false,
+        "push": true,
+        "slack": true
+      },
+      "dashboard": {
+        "defaultView": "kanban",
+        "recentProjects": ["PRJ-002"]
+      }
+    },
+    "projectRoles": [
+      {
+        "projectId": "PRJ-001",
+        "projectKey": "VBOT",
+        "role": "Developer"
+      },
+      {
+        "projectId": "PRJ-002",
+        "projectKey": "DASH",
+        "role": "Lead Developer"
+      }
+    ],
+    "skills": ["JavaScript", "React", "CSS", "HTML", "UI/UX", "Chart.js"]
+  },
+  {
+    "id": "usr_567891234",
+    "name": "Michael Chen",
+    "email": "michael@example.com",
+    "avatarUrl": "https://secure.gravatar.com/avatar/567891?d=identicon",
+    "role": "Developer",
+    "title": "Backend Developer",
+    "department": "Engineering",
+    "location": "Boston",
+    "created": "2023-04-12T11:45:00.000Z",
+    "lastLogin": "2023-09-16T16:30:00.000Z",
+    "status": "Active",
+    "preferences": {
+      "theme": "dark",
+      "notifications": {
+        "email": true,
+        "push": true,
+        "slack": false
+      },
+      "dashboard": {
+        "defaultView": "list",
+        "recentProjects": ["PRJ-003"]
+      }
+    },
+    "projectRoles": [
+      {
+        "projectId": "PRJ-003",
+        "projectKey": "AUTH",
+        "role": "Lead Developer"
+      }
+    ],
+    "skills": ["Java", "Spring Boot", "PostgreSQL", "Security", "API Design"]
+  },
+  {
+    "id": "usr_234567891",
+    "name": "Sarah Williams",
+    "email": "sarah@example.com",
+    "avatarUrl": "https://secure.gravatar.com/avatar/234567?d=identicon",
+    "role": "QA",
+    "title": "QA Engineer",
+    "department": "Quality Assurance",
+    "location": "Chicago",
+    "created": "2023-05-20T14:10:00.000Z",
+    "lastLogin": "2023-09-15T10:25:00.000Z",
+    "status": "On Leave",
+    "preferences": {
+      "theme": "light",
+      "notifications": {
+        "email": true,
+        "push": false,
+        "slack": true
+      },
+      "dashboard": {
+        "defaultView": "kanban",
+        "recentProjects": ["PRJ-001", "PRJ-002"]
+      }
+    },
+    "projectRoles": [
+      {
+        "projectId": "PRJ-001",
+        "projectKey": "VBOT",
+        "role": "QA"
+      },
+      {
+        "projectId": "PRJ-002",
+        "projectKey": "DASH",
+        "role": "QA"
+      }
+    ],
+    "skills": ["Cypress", "Jest", "Selenium", "Manual Testing", "Test Planning"]
+  }
+] 

@@ -1,0 +1,28 @@
+{
+  "id": "usr_123456789",
+  "email": "test@example.com",
+  "firstName": "Test",
+  "lastName": "User",
+  "role": "admin",
+  "createdAt": "2023-08-15T08:30:00.000Z",
+  "lastLogin": "2023-09-21T09:45:00.000Z",
+  "preferences": {
+    "theme": "dark",
+    "language": "en-US",
+    "notifications": {
+      "email": true,
+      "browser": true
+    }
+  },
+  "jiraConnection": {
+    "connected": true,
+    "instance": "https://company.atlassian.net",
+    "lastSync": "2023-09-21T09:30:00.000Z"
+  },
+  "voiceSettings": {
+    "enabled": true,
+    "sensitivity": 0.7,
+    "language": "en-US",
+    "autoActivate": true
+  }
+} 

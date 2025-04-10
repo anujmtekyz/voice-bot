@@ -1,0 +1,243 @@
+[
+  {
+    "id": "VBOT-1",
+    "key": "VBOT-1",
+    "summary": "Implement voice command recognition system",
+    "description": "Create a voice recognition system that can accurately detect user commands for JIRA operations. The system should handle common accents and background noise.",
+    "projectId": "PRJ-001",
+    "projectKey": "VBOT",
+    "projectName": "Voice Bot",
+    "issueType": "Epic",
+    "priority": "High",
+    "status": "In Progress",
+    "assignee": {
+      "id": "usr_123456789",
+      "name": "Test User",
+      "email": "test@example.com",
+      "avatarUrl": "https://secure.gravatar.com/avatar/123456?d=identicon"
+    },
+    "reporter": {
+      "id": "usr_456789123",
+      "name": "Alex Johnson",
+      "email": "alex@example.com",
+      "avatarUrl": "https://secure.gravatar.com/avatar/456789?d=identicon"
+    },
+    "created": "2023-08-01T09:30:00.000Z",
+    "updated": "2023-09-18T14:20:00.000Z",
+    "dueDate": "2023-10-15T00:00:00.000Z",
+    "labels": ["voice", "core-feature", "ai"],
+    "components": ["Voice Processing", "NLP"],
+    "storyPoints": 13,
+    "sprint": {
+      "id": "sprint_003",
+      "name": "Voice Bot Sprint 3"
+    },
+    "comments": [
+      {
+        "id": "comment_001",
+        "author": {
+          "id": "usr_456789123",
+          "name": "Alex Johnson",
+          "avatarUrl": "https://secure.gravatar.com/avatar/456789?d=identicon"
+        },
+        "body": "We should integrate with OpenRouter for better processing capabilities.",
+        "created": "2023-08-15T11:30:00.000Z"
+      },
+      {
+        "id": "comment_002",
+        "author": {
+          "id": "usr_123456789",
+          "name": "Test User",
+          "avatarUrl": "https://secure.gravatar.com/avatar/123456?d=identicon"
+        },
+        "body": "I've started testing with Whisper model, results look promising.",
+        "created": "2023-09-02T16:45:00.000Z"
+      }
+    ],
+    "attachments": [
+      {
+        "id": "attachment_001",
+        "filename": "voice_processing_plan.pdf",
+        "size": 1245678,
+        "mimeType": "application/pdf",
+        "created": "2023-08-10T10:15:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "VBOT-7",
+    "key": "VBOT-7",
+    "summary": "Implement WebSocket connection for real-time voice processing",
+    "description": "Set up WebSocket connection between frontend and backend to enable real-time voice command processing without refreshing the page.",
+    "projectId": "PRJ-001",
+    "projectKey": "VBOT",
+    "projectName": "Voice Bot",
+    "issueType": "Task",
+    "priority": "Medium",
+    "status": "To Do",
+    "assignee": {
+      "id": "usr_987654321",
+      "name": "Jane Smith",
+      "email": "jane@example.com",
+      "avatarUrl": "https://secure.gravatar.com/avatar/987654?d=identicon"
+    },
+    "reporter": {
+      "id": "usr_123456789",
+      "name": "Test User",
+      "email": "test@example.com",
+      "avatarUrl": "https://secure.gravatar.com/avatar/123456?d=identicon"
+    },
+    "created": "2023-09-05T13:40:00.000Z",
+    "updated": "2023-09-05T13:40:00.000Z",
+    "dueDate": "2023-09-25T00:00:00.000Z",
+    "labels": ["websocket", "realtime", "frontend"],
+    "components": ["Voice Processing", "Frontend"],
+    "storyPoints": 5,
+    "sprint": {
+      "id": "sprint_003",
+      "name": "Voice Bot Sprint 3"
+    },
+    "comments": [],
+    "attachments": []
+  },
+  {
+    "id": "DASH-12",
+    "key": "DASH-12",
+    "summary": "Create project burndown chart component",
+    "description": "Develop a reusable burndown chart component for the dashboard that visualizes sprint progress and can be configured for different time periods.",
+    "projectId": "PRJ-002",
+    "projectKey": "DASH",
+    "projectName": "Dashboard Services",
+    "issueType": "Story",
+    "priority": "High",
+    "status": "In Progress",
+    "assignee": {
+      "id": "usr_987654321",
+      "name": "Jane Smith",
+      "email": "jane@example.com",
+      "avatarUrl": "https://secure.gravatar.com/avatar/987654?d=identicon"
+    },
+    "reporter": {
+      "id": "usr_456789123",
+      "name": "Alex Johnson",
+      "email": "alex@example.com",
+      "avatarUrl": "https://secure.gravatar.com/avatar/456789?d=identicon"
+    },
+    "created": "2023-08-20T10:15:00.000Z",
+    "updated": "2023-09-10T09:30:00.000Z",
+    "dueDate": "2023-09-30T00:00:00.000Z",
+    "labels": ["chart", "dashboard", "frontend"],
+    "components": ["Reporting", "UI Components"],
+    "storyPoints": 8,
+    "sprint": {
+      "id": "sprint_102",
+      "name": "Dashboard Sprint 2"
+    },
+    "comments": [
+      {
+        "id": "comment_021",
+        "author": {
+          "id": "usr_456789123",
+          "name": "Alex Johnson",
+          "avatarUrl": "https://secure.gravatar.com/avatar/456789?d=identicon"
+        },
+        "body": "Let's use Chart.js for this implementation.",
+        "created": "2023-08-22T15:10:00.000Z"
+      }
+    ],
+    "attachments": [
+      {
+        "id": "attachment_012",
+        "filename": "burndown_mockup.png",
+        "size": 245678,
+        "mimeType": "image/png",
+        "created": "2023-08-21T14:25:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "AUTH-5",
+    "key": "AUTH-5",
+    "summary": "Implement role-based access control",
+    "description": "Create a comprehensive RBAC system that can control access to different parts of the application based on user roles and permissions.",
+    "projectId": "PRJ-003",
+    "projectKey": "AUTH",
+    "projectName": "Authentication Service",
+    "issueType": "Story",
+    "priority": "Critical",
+    "status": "Done",
+    "assignee": {
+      "id": "usr_123456789",
+      "name": "Test User",
+      "email": "test@example.com",
+      "avatarUrl": "https://secure.gravatar.com/avatar/123456?d=identicon"
+    },
+    "reporter": {
+      "id": "usr_123456789",
+      "name": "Test User",
+      "email": "test@example.com",
+      "avatarUrl": "https://secure.gravatar.com/avatar/123456?d=identicon"
+    },
+    "created": "2023-07-15T08:20:00.000Z",
+    "updated": "2023-08-30T11:45:00.000Z",
+    "dueDate": "2023-08-30T00:00:00.000Z",
+    "labels": ["security", "rbac", "permissions"],
+    "components": ["Auth", "Security"],
+    "storyPoints": 13,
+    "sprint": {
+      "id": "sprint_202",
+      "name": "Auth Sprint 2"
+    },
+    "comments": [
+      {
+        "id": "comment_031",
+        "author": {
+          "id": "usr_456789123",
+          "name": "Alex Johnson",
+          "avatarUrl": "https://secure.gravatar.com/avatar/456789?d=identicon"
+        },
+        "body": "We need to ensure this integrates well with the JWT implementation.",
+        "created": "2023-07-18T13:20:00.000Z"
+      },
+      {
+        "id": "comment_032",
+        "author": {
+          "id": "usr_123456789",
+          "name": "Test User",
+          "avatarUrl": "https://secure.gravatar.com/avatar/123456?d=identicon"
+        },
+        "body": "Implementation complete and tested with all defined roles. Added unit and integration tests.",
+        "created": "2023-08-29T16:35:00.000Z"
+      }
+    ],
+    "attachments": []
+  },
+  {
+    "id": "VBOT-15",
+    "key": "VBOT-15",
+    "summary": "Implement voice command history tracking",
+    "description": "Create a system to record and display user's voice command history, including the command, result, and timestamp.",
+    "projectId": "PRJ-001",
+    "projectKey": "VBOT",
+    "projectName": "Voice Bot",
+    "issueType": "Story",
+    "priority": "Medium",
+    "status": "To Do",
+    "assignee": null,
+    "reporter": {
+      "id": "usr_123456789",
+      "name": "Test User",
+      "email": "test@example.com",
+      "avatarUrl": "https://secure.gravatar.com/avatar/123456?d=identicon"
+    },
+    "created": "2023-09-12T11:30:00.000Z",
+    "updated": "2023-09-12T11:30:00.000Z",
+    "dueDate": null,
+    "labels": ["history", "user-experience"],
+    "components": ["Voice Processing", "Database"],
+    "storyPoints": 5,
+    "sprint": null,
+    "comments": [],
+    "attachments": []
+  }
+] 

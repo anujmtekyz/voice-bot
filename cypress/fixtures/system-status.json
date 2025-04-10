@@ -1,0 +1,23 @@
+{
+  "status": "healthy",
+  "timestamp": "2023-09-21T14:30:00.000Z",
+  "database": {
+    "status": "connected",
+    "latency": 5,
+    "migrations": "up-to-date"
+  },
+  "services": {
+    "jira": {
+      "status": "connected",
+      "latency": 120
+    },
+    "openRouter": {
+      "status": "connected",
+      "latency": 85
+    },
+    "redis": {
+      "status": "connected",
+      "latency": 2
+    }
+  }
+} 

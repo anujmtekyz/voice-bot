@@ -1,0 +1,13 @@
+{
+  "version": "1.2.0",
+  "build": "12345",
+  "environment": "development",
+  "apiVersion": "v1",
+  "lastUpdate": "2023-09-21T10:15:00.000Z",
+  "features": {
+    "voiceProcessing": true,
+    "jiraIntegration": true,
+    "advancedReporting": false,
+    "customCommands": true
+  }
+} 
