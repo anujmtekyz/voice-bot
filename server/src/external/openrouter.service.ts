@@ -12,7 +12,7 @@ export class OpenRouterService {
   private readonly baseUrl: string;
 
   constructor(private configService: ConfigService) {
-    this.apiKey = this.configService.get<string>('OPENROUTER_API_KEY');
+    this.apiKey = this.configService.get<string>('OPENROUTER_API_KEY') || '';
     this.baseUrl =
       this.configService.get<string>('OPENROUTER_BASE_URL') ||
       'https://openrouter.ai/api/v1';
@@ -59,9 +59,10 @@ export class OpenRouterService {
       }
 
       throw new Error('Invalid response format from transcription service');
-    } catch (error) {
-      this.logger.error(`Transcription error: ${error.message}`, error.stack);
-      throw new Error(`Failed to transcribe audio: ${error.message}`);
+    } catch (error: unknown) {
+      const err = error as Error;
+      this.logger.error(`Transcription error: ${err.message}`, err.stack);
+      throw new Error(`Failed to transcribe audio: ${err.message}`);
     }
   }
 
@@ -123,9 +124,10 @@ export class OpenRouterService {
       }
 
       throw new Error('Invalid response format from interpretation service');
-    } catch (error) {
-      this.logger.error(`Interpretation error: ${error.message}`, error.stack);
-      throw new Error(`Failed to interpret transcript: ${error.message}`);
+    } catch (error: unknown) {
+      const err = error as Error;
+      this.logger.error(`Interpretation error: ${err.message}`, err.stack);
+      throw new Error(`Failed to interpret transcript: ${err.message}`);
     }
   }
 
@@ -155,9 +157,10 @@ export class OpenRouterService {
       // Convert audio data to base64
       const audioBase64 = Buffer.from(response.data).toString('base64');
       return audioBase64;
-    } catch (error) {
-      this.logger.error(`Text-to-speech error: ${error.message}`, error.stack);
-      throw new Error(`Failed to generate speech: ${error.message}`);
+    } catch (error: unknown) {
+      const err = error as Error;
+      this.logger.error(`Text-to-speech error: ${err.message}`, err.stack);
+      throw new Error(`Failed to generate speech: ${err.message}`);
     }
   }
 
@@ -197,10 +200,11 @@ export class OpenRouterService {
         interpretation: interpretationModels,
         textToSpeech: textToSpeechModels,
       };
-    } catch (error) {
+    } catch (error: unknown) {
+      const err = error as Error;
       this.logger.error(
-        `Error fetching available models: ${error.message}`,
-        error.stack,
+        `Error fetching available models: ${err.message}`,
+        err.stack,
       );
 
       // Return some default models as fallback
@@ -257,10 +261,11 @@ export class OpenRouterService {
       });
 
       return response.data;
-    } catch (error) {
+    } catch (error: unknown) {
+      const err = error as Error;
       this.logger.error(
-        `Error fetching usage statistics: ${error.message}`,
-        error.stack,
+        `Error fetching usage statistics: ${err.message}`,
+        err.stack,
       );
 
       // Return mock data as fallback

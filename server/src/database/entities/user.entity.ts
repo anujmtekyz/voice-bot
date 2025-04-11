@@ -58,6 +58,25 @@ export class User {
   @Column({ name: 'last_login_at', nullable: true })
   lastLoginAt: Date;
 
+  @Column({ name: 'password_reset_token', nullable: true })
+  @Exclude({ toPlainOnly: true })
+  passwordResetToken: string;
+
+  @Column({ name: 'password_reset_expires', nullable: true })
+  passwordResetExpires: Date;
+
+  @Column({ name: 'failed_login_attempts', default: 0 })
+  failedLoginAttempts: number;
+
+  @Column({ name: 'account_locked', default: false })
+  accountLocked: boolean;
+
+  @Column({ name: 'lock_expires_at', nullable: true })
+  lockExpiresAt: Date;
+
+  @Column({ name: 'is_active', default: true })
+  isActive: boolean;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 

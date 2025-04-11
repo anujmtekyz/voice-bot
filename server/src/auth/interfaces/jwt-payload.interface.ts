@@ -1,31 +1,29 @@
-import { UserRole } from '../enums/user-role.enum';
-
 /**
- * Interface representing the decoded JWT token payload
+ * Interface for JWT token payload
  */
 export interface JwtPayload {
   /**
-   * User's unique identifier
+   * User ID (subject)
    */
   sub: string;
 
   /**
-   * User's email address
+   * User email
    */
   email: string;
 
   /**
-   * User's role for authorization
+   * User role
    */
-  role: UserRole;
+  role: string;
 
   /**
-   * Token issued at timestamp
+   * Token issue date
    */
   iat?: number;
 
   /**
-   * Token expiration timestamp
+   * Token expiration date
    */
   exp?: number;
 }

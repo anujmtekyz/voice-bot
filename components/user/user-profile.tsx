@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -10,17 +10,24 @@ import { Switch } from "@/components/ui/switch"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useAuth } from "@/hooks/use-auth"
+import { useToast } from "@/hooks/use-toast"
+import { userApi } from "@/lib/auth-api"
+import { Loader2 } from "lucide-react"
 
 export function UserProfile() {
+  const { user, refreshUserProfile } = useAuth()
+  const { toast } = useToast()
   const [isEditing, setIsEditing] = useState(false)
-
-  // Mock user data
-  const user = {
-    name: "John Doe",
-    email: "john.doe@example.com",
-    role: "Developer",
-    department: "Engineering",
-    bio: "Full-stack developer with 5 years of experience in web applications and distributed systems.",
+  const [isSaving, setIsSaving] = useState(false)
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    role: "",
+    jiraEmail: "",
+    jiraServerUrl: "",
+    bio: "",
     timezone: "America/New_York",
     language: "en",
     notifications: {
@@ -33,6 +40,81 @@ export function UserProfile() {
       mentionedInComment: true,
       statusChanged: false,
     },
+  })
+
+  // Update form data when user data changes
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        firstName: user.firstName || "",
+        lastName: user.lastName || "",
+        email: user.email || "",
+        role: user.role || "",
+        jiraEmail: user.jiraEmail || "",
+        jiraServerUrl: user.jiraServerUrl || "",
+        bio: "",  // Not in user profile model but kept for UI
+        timezone: "America/New_York", // Default
+        language: "en", // Default
+        notifications: {
+          email: true,
+          browser: true,
+          mobile: false,
+          ticketAssigned: true,
+          ticketUpdated: true,
+          commentAdded: true,
+          mentionedInComment: true,
+          statusChanged: false,
+        },
+      })
+    }
+  }, [user])
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value,
+    }))
+  }
+
+  const handleSaveProfile = async () => {
+    setIsSaving(true)
+    try {
+      // Only send fields that are editable by the user
+      await userApi.updateProfile({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        jiraEmail: formData.jiraEmail,
+        jiraServerUrl: formData.jiraServerUrl
+      })
+      
+      // Refresh the user profile in auth context
+      await refreshUserProfile()
+      
+      toast({
+        title: "Profile updated",
+        description: "Your profile information has been updated successfully",
+      })
+      
+      setIsEditing(false)
+    } catch (error) {
+      console.error("Failed to update profile:", error)
+      toast({
+        title: "Update failed",
+        description: "Failed to update your profile. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  if (!user) {
+    return (
+      <div className="flex h-[50vh] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <span className="ml-2">Loading profile...</span>
+      </div>
+    )
   }
 
   return (
@@ -57,8 +139,16 @@ export function UserProfile() {
                   <CardTitle>Personal Information</CardTitle>
                   <CardDescription>Update your personal details</CardDescription>
                 </div>
-                <Button variant={isEditing ? "default" : "outline"} onClick={() => setIsEditing(!isEditing)}>
-                  {isEditing ? "Save Changes" : "Edit Profile"}
+                <Button 
+                  variant={isEditing ? "default" : "outline"} 
+                  onClick={isEditing ? handleSaveProfile : () => setIsEditing(true)}
+                  disabled={isSaving}
+                >
+                  {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {isEditing 
+                    ? (isSaving ? "Saving..." : "Save Changes") 
+                    : "Edit Profile"
+                  }
                 </Button>
               </div>
             </CardHeader>
@@ -66,26 +156,83 @@ export function UserProfile() {
               <div className="space-y-4">
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-2">
-                    <Label htmlFor="name">Full Name</Label>
-                    <Input id="name" defaultValue={user.name} disabled={!isEditing} />
+                    <Label htmlFor="firstName">First Name</Label>
+                    <Input 
+                      id="firstName" 
+                      value={formData.firstName} 
+                      onChange={(e) => handleInputChange("firstName", e.target.value)}
+                      disabled={!isEditing || isSaving} 
+                    />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input id="email" type="email" defaultValue={user.email} disabled={!isEditing} />
+                    <Label htmlFor="lastName">Last Name</Label>
+                    <Input 
+                      id="lastName" 
+                      value={formData.lastName} 
+                      onChange={(e) => handleInputChange("lastName", e.target.value)}
+                      disabled={!isEditing || isSaving} 
+                    />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="role">Role</Label>
-                    <Input id="role" defaultValue={user.role} disabled={!isEditing} />
+                    <Label htmlFor="email">Email (Cannot be changed)</Label>
+                    <Input 
+                      id="email" 
+                      type="email" 
+                      value={formData.email} 
+                      disabled={true} 
+                    />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="department">Department</Label>
-                    <Input id="department" defaultValue={user.department} disabled={!isEditing} />
+                    <Label htmlFor="role">Role (Assigned by admin)</Label>
+                    <Input 
+                      id="role" 
+                      value={formData.role} 
+                      disabled={true} 
+                    />
                   </div>
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="bio">Bio</Label>
-                  <Textarea id="bio" defaultValue={user.bio} disabled={!isEditing} className="min-h-[100px]" />
+                  <Textarea 
+                    id="bio" 
+                    value={formData.bio} 
+                    onChange={(e) => handleInputChange("bio", e.target.value)}
+                    disabled={!isEditing || isSaving} 
+                    className="min-h-[100px]" 
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>JIRA Integration</CardTitle>
+              <CardDescription>Connect your JIRA account</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="jiraEmail">JIRA Email</Label>
+                    <Input 
+                      id="jiraEmail" 
+                      value={formData.jiraEmail} 
+                      onChange={(e) => handleInputChange("jiraEmail", e.target.value)}
+                      disabled={!isEditing || isSaving} 
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="jiraServerUrl">JIRA Server URL</Label>
+                    <Input 
+                      id="jiraServerUrl" 
+                      value={formData.jiraServerUrl} 
+                      onChange={(e) => handleInputChange("jiraServerUrl", e.target.value)}
+                      disabled={!isEditing || isSaving} 
+                      placeholder="https://your-domain.atlassian.net"
+                    />
+                  </div>
                 </div>
               </div>
             </CardContent>
@@ -101,7 +248,11 @@ export function UserProfile() {
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-2">
                     <Label htmlFor="timezone">Timezone</Label>
-                    <Select defaultValue={user.timezone} disabled={!isEditing}>
+                    <Select 
+                      value={formData.timezone} 
+                      onValueChange={(value) => handleInputChange("timezone", value)} 
+                      disabled={!isEditing || isSaving}
+                    >
                       <SelectTrigger id="timezone">
                         <SelectValue placeholder="Select timezone" />
                       </SelectTrigger>
@@ -116,7 +267,11 @@ export function UserProfile() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="language">Language</Label>
-                    <Select defaultValue={user.language} disabled={!isEditing}>
+                    <Select 
+                      value={formData.language} 
+                      onValueChange={(value) => handleInputChange("language", value)} 
+                      disabled={!isEditing || isSaving}
+                    >
                       <SelectTrigger id="language">
                         <SelectValue placeholder="Select language" />
                       </SelectTrigger>
@@ -151,21 +306,21 @@ export function UserProfile() {
                         <Label htmlFor="email-notifications">Email Notifications</Label>
                         <p className="text-xs text-muted-foreground">Receive notifications via email</p>
                       </div>
-                      <Switch id="email-notifications" defaultChecked={user.notifications.email} />
+                      <Switch id="email-notifications" checked={formData.notifications.email} />
                     </div>
                     <div className="flex items-center justify-between">
                       <div className="space-y-0.5">
                         <Label htmlFor="browser-notifications">Browser Notifications</Label>
                         <p className="text-xs text-muted-foreground">Receive notifications in your browser</p>
                       </div>
-                      <Switch id="browser-notifications" defaultChecked={user.notifications.browser} />
+                      <Switch id="browser-notifications" checked={formData.notifications.browser} />
                     </div>
                     <div className="flex items-center justify-between">
                       <div className="space-y-0.5">
                         <Label htmlFor="mobile-notifications">Mobile Notifications</Label>
                         <p className="text-xs text-muted-foreground">Receive notifications on your mobile device</p>
                       </div>
-                      <Switch id="mobile-notifications" defaultChecked={user.notifications.mobile} />
+                      <Switch id="mobile-notifications" checked={formData.notifications.mobile} />
                     </div>
                   </div>
                 </div>
@@ -177,23 +332,23 @@ export function UserProfile() {
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <Label htmlFor="ticket-assigned">Ticket assigned to you</Label>
-                      <Switch id="ticket-assigned" defaultChecked={user.notifications.ticketAssigned} />
+                      <Switch id="ticket-assigned" checked={formData.notifications.ticketAssigned} />
                     </div>
                     <div className="flex items-center justify-between">
                       <Label htmlFor="ticket-updated">Ticket updated</Label>
-                      <Switch id="ticket-updated" defaultChecked={user.notifications.ticketUpdated} />
+                      <Switch id="ticket-updated" checked={formData.notifications.ticketUpdated} />
                     </div>
                     <div className="flex items-center justify-between">
                       <Label htmlFor="comment-added">Comment added</Label>
-                      <Switch id="comment-added" defaultChecked={user.notifications.commentAdded} />
+                      <Switch id="comment-added" checked={formData.notifications.commentAdded} />
                     </div>
                     <div className="flex items-center justify-between">
                       <Label htmlFor="mentioned">Mentioned in comment</Label>
-                      <Switch id="mentioned" defaultChecked={user.notifications.mentionedInComment} />
+                      <Switch id="mentioned" checked={formData.notifications.mentionedInComment} />
                     </div>
                     <div className="flex items-center justify-between">
                       <Label htmlFor="status-changed">Status changed</Label>
-                      <Switch id="status-changed" defaultChecked={user.notifications.statusChanged} />
+                      <Switch id="status-changed" checked={formData.notifications.statusChanged} />
                     </div>
                   </div>
                 </div>
@@ -248,22 +403,23 @@ export function UserProfile() {
                   },
                 ].map((item) => (
                   <div key={item.id} className="rounded-lg border p-4">
-                    <div className="flex items-start justify-between">
+                    <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                       <div>
-                        <p className="font-medium">{item.command}</p>
+                        <p className="font-medium">"{item.command}"</p>
                         <p className="text-sm text-muted-foreground">{item.timestamp}</p>
                       </div>
-                      <div
-                        className={`rounded-full px-2 py-1 text-xs font-medium ${
-                          item.success ? "bg-green-50 text-green-600" : "bg-red-50 text-red-600"
-                        }`}
-                      >
-                        {item.success ? "Success" : "Failed"}
+                      <div className="flex items-center mt-2 sm:mt-0">
+                        <span
+                          className={`mr-2 h-2 w-2 rounded-full ${
+                            item.success ? "bg-green-500" : "bg-red-500"
+                          }`}
+                        />
+                        <span className={`text-sm ${item.success ? "text-green-500" : "text-red-500"}`}>
+                          {item.success ? "Success" : "Failed"}
+                        </span>
                       </div>
                     </div>
-                    <div className="mt-2 rounded-md bg-gray-50 p-2 text-sm">
-                      <p>Response: {item.response}</p>
-                    </div>
+                    <p className="mt-2 text-sm">{item.response}</p>
                   </div>
                 ))}
               </div>
@@ -274,3 +430,4 @@ export function UserProfile() {
     </div>
   )
 }
+

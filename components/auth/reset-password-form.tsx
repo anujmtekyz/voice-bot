@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useToast } from "@/hooks/use-toast"
+import { authApi } from "@/lib/auth-api"
 
 interface ResetPasswordFormProps {
   token: string
@@ -56,12 +57,13 @@ export function ResetPasswordForm({ token, onResetComplete }: ResetPasswordFormP
 
     setIsLoading(true)
 
-    // Simulate API call to reset password
-    setTimeout(() => {
-      setIsLoading(false)
-
-      // In a real app, you would call your API to reset the password using the token
-      // For demo purposes, we'll just simulate success
+    try {
+      // Call the actual password reset API
+      await authApi.resetPassword({
+        token,
+        newPassword: password
+      })
+      
       toast({
         title: "Password reset successful",
         description: "Your password has been reset. You can now log in with your new password.",
@@ -69,7 +71,21 @@ export function ResetPasswordForm({ token, onResetComplete }: ResetPasswordFormP
 
       // Notify parent component that reset is complete
       onResetComplete()
-    }, 1500)
+    } catch (error) {
+      console.error("Password reset failed:", error)
+      
+      toast({
+        title: "Reset failed",
+        description: "Failed to reset your password. The link may have expired or is invalid.",
+        variant: "destructive",
+      })
+      
+      setErrors({
+        password: "Password reset failed. Please try again or request a new reset link."
+      })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (

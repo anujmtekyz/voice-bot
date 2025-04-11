@@ -15,8 +15,9 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { Logo } from "@/components/ui/logo"
-import Cookies from "js-cookie"
 import { useToast } from "@/hooks/use-toast"
+import { useAuth } from "@/hooks/use-auth"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 
 interface HeaderProps {
   onMenuClick: () => void
@@ -25,19 +26,46 @@ interface HeaderProps {
 export function Header({ onMenuClick }: HeaderProps) {
   const router = useRouter()
   const { toast } = useToast()
+  const { user, logout } = useAuth()
 
-  const handleLogout = () => {
-    // Remove auth cookie
-    Cookies.remove("auth_token")
+  const handleLogout = async () => {
+    try {
+      // Call the auth context logout method
+      await logout()
+      
+      // Show toast notification
+      toast({
+        title: "Logged out",
+        description: "You have been successfully logged out",
+      })
+      
+      // Router redirection is handled by the auth context
+    } catch (error) {
+      console.error("Logout error:", error)
+      toast({
+        title: "Error",
+        description: "Failed to log out. Please try again.",
+        variant: "destructive",
+      })
+    }
+  }
 
-    // Show toast notification
-    toast({
-      title: "Logged out",
-      description: "You have been successfully logged out",
-    })
-
-    // Redirect to login page
-    router.push("/login")
+  // Get user initials for avatar
+  const getUserInitials = () => {
+    if (!user) return "U"
+    
+    const firstName = user.firstName || ""
+    const lastName = user.lastName || ""
+    
+    if (firstName && lastName) {
+      return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase()
+    } else if (firstName) {
+      return firstName.charAt(0).toUpperCase()
+    } else if (user.email) {
+      return user.email.charAt(0).toUpperCase()
+    } else {
+      return "U"
+    }
   }
 
   return (
@@ -65,12 +93,25 @@ export function Header({ onMenuClick }: HeaderProps) {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="rounded-full">
-                <User className="h-5 w-5" />
+                {user ? (
+                  <Avatar className="h-8 w-8">
+                    <AvatarFallback>{getUserInitials()}</AvatarFallback>
+                  </Avatar>
+                ) : (
+                  <User className="h-5 w-5" />
+                )}
                 <span className="sr-only">User menu</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
+              {user && (
+                <>
+                  <DropdownMenuLabel>{user.firstName || user.email}</DropdownMenuLabel>
+                  <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
+                    {user.email}
+                  </DropdownMenuLabel>
+                </>
+              )}
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
                 <Link href="/profile">Profile</Link>

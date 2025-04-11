@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { useToast } from "@/hooks/use-toast"
-import Cookies from "js-cookie"
+import { useAuth } from "@/hooks/use-auth"
 
 interface LoginFormProps {
   onVoiceLoginToggle?: (active: boolean) => void
@@ -21,6 +21,7 @@ interface LoginFormProps {
 export function LoginForm({ onVoiceLoginToggle, isVoiceLoginActive = false }: LoginFormProps) {
   const router = useRouter()
   const { toast } = useToast()
+  const { login, isLoading: authLoading } = useAuth()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
@@ -60,37 +61,23 @@ export function LoginForm({ onVoiceLoginToggle, isVoiceLoginActive = false }: Lo
       return
     }
 
-    setIsLoading(true)
-
-    // Simulate login API call
-    setTimeout(() => {
-      // For demo purposes, accept any email with a valid format and password length >= 6
-      if (/\S+@\S+\.\S+/.test(email) && password.length >= 6) {
-        // Set auth cookie
-        const expirationDays = rememberMe ? 30 : 1
-        Cookies.set("auth_token", "demo_token_" + Date.now(), {
-          expires: expirationDays,
-          sameSite: "strict",
-        })
-
-        // Success
-        toast({
-          title: "Login successful",
-          description: "Welcome to JIRA VoiceBot",
-        })
-
-        // Redirect to dashboard
-        router.push("/dashboard")
-      } else {
-        // Failure
-        toast({
-          title: "Login failed",
-          description: "Invalid email or password",
-          variant: "destructive",
-        })
+    try {
+      // Use the auth hook's login method
+      const success = await login({ email, password }, rememberMe)
+      
+      if (!success) {
         setIsLoading(false)
       }
-    }, 1500)
+      // Redirect is handled by the auth hook
+    } catch (error: any) {
+      console.error("Login error:", error)
+      toast({
+        title: "Login failed",
+        description: error.response?.data?.message || "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      })
+      setIsLoading(false)
+    }
   }
 
   const toggleVoiceLogin = () => {
@@ -98,6 +85,9 @@ export function LoginForm({ onVoiceLoginToggle, isVoiceLoginActive = false }: Lo
       onVoiceLoginToggle(!isVoiceLoginActive)
     }
   }
+
+  // Derive combined loading state from local and auth context
+  const isFormLoading = isLoading || authLoading
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -115,7 +105,7 @@ export function LoginForm({ onVoiceLoginToggle, isVoiceLoginActive = false }: Lo
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className={`pl-10 ${errors.email ? "border-destructive" : ""}`}
-            disabled={isLoading || isVoiceLoginActive}
+            disabled={isFormLoading || isVoiceLoginActive}
           />
         </div>
       </div>
@@ -134,7 +124,7 @@ export function LoginForm({ onVoiceLoginToggle, isVoiceLoginActive = false }: Lo
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className={`pl-10 ${errors.password ? "border-destructive" : ""}`}
-            disabled={isLoading || isVoiceLoginActive}
+            disabled={isFormLoading || isVoiceLoginActive}
           />
           <Button
             type="button"
@@ -142,7 +132,7 @@ export function LoginForm({ onVoiceLoginToggle, isVoiceLoginActive = false }: Lo
             size="icon"
             className="absolute right-0 top-0 h-10 w-10 text-muted-foreground"
             onClick={() => setShowPassword(!showPassword)}
-            disabled={isLoading || isVoiceLoginActive}
+            disabled={isFormLoading || isVoiceLoginActive}
           >
             {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             <span className="sr-only">{showPassword ? "Hide password" : "Show password"}</span>
@@ -156,7 +146,7 @@ export function LoginForm({ onVoiceLoginToggle, isVoiceLoginActive = false }: Lo
             id="remember-me"
             checked={rememberMe}
             onCheckedChange={(checked) => setRememberMe(checked as boolean)}
-            disabled={isLoading || isVoiceLoginActive}
+            disabled={isFormLoading || isVoiceLoginActive}
           />
           <Label htmlFor="remember-me" className="text-sm font-normal">
             Remember me
@@ -167,9 +157,9 @@ export function LoginForm({ onVoiceLoginToggle, isVoiceLoginActive = false }: Lo
         </Link>
       </div>
 
-      <Button type="submit" className="w-full" disabled={isLoading || isVoiceLoginActive}>
-        {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-        {isLoading ? "Signing in..." : "Sign in"}
+      <Button type="submit" className="w-full" disabled={isFormLoading || isVoiceLoginActive}>
+        {isFormLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+        {isFormLoading ? "Signing in..." : "Sign in"}
       </Button>
 
       <div className="relative">
@@ -181,7 +171,7 @@ export function LoginForm({ onVoiceLoginToggle, isVoiceLoginActive = false }: Lo
         </div>
       </div>
 
-      <Button type="button" variant="outline" className="w-full" onClick={toggleVoiceLogin} disabled={isLoading}>
+      <Button type="button" variant="outline" className="w-full" onClick={toggleVoiceLogin} disabled={isFormLoading}>
         <Mic className="mr-2 h-4 w-4" />
         Voice Login
       </Button>

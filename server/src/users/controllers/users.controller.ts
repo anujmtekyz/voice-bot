@@ -1,52 +1,102 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Put,
+  Body,
+  UseGuards,
+  Request,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
+import { UsersService } from '../services/users.service';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
-import { RolesGuard } from '../../auth/guards/roles.guard';
-import { Roles } from '../../auth/decorators/roles.decorator';
-import { UserRole } from '../../auth/enums/user-role.enum';
+import { RequestWithUser } from '../../auth/interfaces/request-with-user.interface';
+import { UpdateUserDto } from '../dto/update-user.dto';
+import { ChangePasswordDto } from '../dto/change-password.dto';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 
 /**
- * Controller handling user management operations
+ * Controller for user profile and preferences management
  */
+@ApiTags('User Management')
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @Controller('users')
 export class UsersController {
+  constructor(private readonly usersService: UsersService) {}
+
   /**
-   * Get basic user profile information
-   * Accessible to any authenticated user
+   * Get current user profile
    *
-   * @returns {object} User profile data
+   * @param {RequestWithUser} req - Express request with user data
+   * @returns {Promise<any>} User profile data
    */
+  @ApiOperation({ summary: 'Get user profile' })
+  @ApiResponse({ status: 200, description: 'Profile retrieved successfully' })
   @Get('profile')
-  @UseGuards(JwtAuthGuard)
-  getUserProfile() {
-    return { message: 'This endpoint is accessible to any authenticated user' };
+  async getProfile(@Request() req: RequestWithUser) {
+    return this.usersService.getProfile(req.user.sub);
   }
 
   /**
-   * Get all users in the system
-   * Accessible only to administrators
+   * Update user profile
    *
-   * @returns {object} List of all users
+   * @param {RequestWithUser} req - Express request with user data
+   * @param {UpdateUserDto} updateUserDto - Updated user data
+   * @returns {Promise<any>} Updated user profile
    */
-  @Get('all')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN)
-  getAllUsers() {
-    return { message: 'This endpoint is accessible only to administrators' };
+  @ApiOperation({ summary: 'Update user profile' })
+  @ApiResponse({ status: 200, description: 'Profile updated successfully' })
+  @Put('profile')
+  async updateProfile(
+    @Request() req: RequestWithUser,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
+    return this.usersService.update(req.user.sub, updateUserDto);
   }
 
   /**
-   * Get project management data
-   * Accessible to project managers and administrators
+   * Change user password
    *
-   * @returns {object} Project management data
+   * @param {RequestWithUser} req - Express request with user data
+   * @param {ChangePasswordDto} changePasswordDto - Password change data
+   * @returns {Promise<object>} Result of password change operation
    */
-  @Get('projects')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.PROJECT_MANAGER, UserRole.ADMIN)
-  getProjectData() {
-    return {
-      message:
-        'This endpoint is accessible to project managers and administrators',
-    };
+  @ApiOperation({ summary: 'Change user password' })
+  @ApiResponse({ status: 200, description: 'Password changed successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid current password' })
+  @HttpCode(HttpStatus.OK)
+  @Put('password')
+  async changePassword(
+    @Request() req: RequestWithUser,
+    @Body() changePasswordDto: ChangePasswordDto,
+  ) {
+    return this.usersService.changePassword(
+      req.user.sub,
+      changePasswordDto.currentPassword,
+      changePasswordDto.newPassword,
+    );
+  }
+
+  /**
+   * Get user preferences
+   *
+   * @param {RequestWithUser} req - Express request with user data
+   * @returns {Promise<any>} User preferences data
+   */
+  @ApiOperation({ summary: 'Get user preferences' })
+  @ApiResponse({
+    status: 200,
+    description: 'Preferences retrieved successfully',
+  })
+  @Get('preferences')
+  async getPreferences(@Request() req: RequestWithUser) {
+    const user = await this.usersService.findById(req.user.sub);
+    return user.settings;
   }
 }

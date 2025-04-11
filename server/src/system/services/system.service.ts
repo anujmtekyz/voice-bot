@@ -62,9 +62,10 @@ export class SystemService {
         databaseStatus = 'error';
         databaseMessage = 'Database connection is not active';
       }
-    } catch (error) {
+    } catch (error: unknown) {
+      const err = error as Error;
       databaseStatus = 'error';
-      databaseMessage = `Database error: ${error.message}`;
+      databaseMessage = `Database error: ${err.message}`;
     }
 
     // TODO: Check Redis connection (needs Redis client implementation)

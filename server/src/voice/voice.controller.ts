@@ -217,9 +217,7 @@ export class VoiceController {
     try {
       return await this.voiceService.transcribeAudio(
         body.audio,
-        body.format,
-        body.model,
-        body.language,
+        body.format || '',
       );
     } catch (error: unknown) {
       if (error instanceof Error) {
@@ -264,9 +262,9 @@ export class VoiceController {
     status: HttpStatus.OK,
     description: 'Usage statistics retrieved',
   })
-  async getUsageStatistics(@Request() req: RequestWithUser) {
+  async getUsageStatistics(@Request() _req: RequestWithUser) {
     try {
-      return await this.voiceService.getUsageStatistics(req.user.id);
+      return await this.voiceService.getUsageStatistics();
     } catch (error: unknown) {
       if (error instanceof Error) {
         throw new HttpException(

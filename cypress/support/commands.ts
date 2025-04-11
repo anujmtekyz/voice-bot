@@ -125,6 +125,22 @@ declare global {
       // drag(subject: string, options?: Partial<TypeOptions>): Chainable<Element>
       // dismiss(subject: string, options?: Partial<TypeOptions>): Chainable<Element>
       // visit(originalFn: CommandOriginalFn, url: string, options: Partial<VisitOptions>): Chainable<Element>
+      /**
+       * Custom command to login a user
+       * @example cy.loginUser('email@example.com', 'password123')
+       */
+      loginUser(email: string, password: string): Chainable<void>
     }
   }
-} 
+}
+
+// Login command for authentication tests
+Cypress.Commands.add('loginUser', (email: string, password: string) => {
+  cy.visit('/login');
+  cy.get('[data-testid=email]').type(email);
+  cy.get('[data-testid=password]').type(password);
+  cy.get('[data-testid=login-button]').click();
+  cy.wait('@loginRequest');
+});
+
+export {}; 

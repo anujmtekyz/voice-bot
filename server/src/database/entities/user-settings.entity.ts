@@ -20,7 +20,7 @@ export class UserSettings {
   @Column({ name: 'voice_activation', default: true })
   voiceActivation: boolean;
 
-  @Column({ name: 'voice_sensitivity', default: 0.5 })
+  @Column({ name: 'voice_sensitivity', type: 'numeric', default: 0.5 })
   voiceSensitivity: number;
 
   @Column({ default: 'en-US' })

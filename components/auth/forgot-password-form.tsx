@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useToast } from "@/hooks/use-toast"
+import { authApi } from "@/lib/auth-api"
 
 interface ForgotPasswordFormProps {
   onEmailSent: (email: string) => void
@@ -43,12 +44,10 @@ export function ForgotPasswordForm({ onEmailSent }: ForgotPasswordFormProps) {
 
     setIsLoading(true)
 
-    // Simulate API call to send password reset email
-    setTimeout(() => {
-      setIsLoading(false)
-
-      // In a real app, you would call your API to send a reset email
-      // For demo purposes, we'll just simulate success
+    try {
+      // Call the actual password reset API
+      await authApi.forgotPassword({ email })
+      
       toast({
         title: "Reset link sent",
         description: "Check your email for password reset instructions",
@@ -56,7 +55,20 @@ export function ForgotPasswordForm({ onEmailSent }: ForgotPasswordFormProps) {
 
       // Notify parent component that email was sent
       onEmailSent(email)
-    }, 1500)
+    } catch (error) {
+      console.error("Password reset request failed:", error)
+      
+      // Show error toast
+      toast({
+        title: "Request failed",
+        description: "Failed to send reset link. Please try again later.",
+        variant: "destructive",
+      })
+      
+      setError("Failed to send reset link. Please try again later.")
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (

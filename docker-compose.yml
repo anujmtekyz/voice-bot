@@ -1,0 +1,105 @@
+version: '3.8'
+
+services:
+  # Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: jira-voice-bot-postgres
+    environment:
+      POSTGRES_USER: ${DB_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_DB: ${DB_DATABASE:-jira_voice_bot}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - jira-voice-bot-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-postgres} -d ${DB_DATABASE:-jira_voice_bot}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis for caching and session management
+  redis:
+    image: redis:7-alpine
+    container_name: jira-voice-bot-redis
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - jira-voice-bot-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend API
+  backend:
+    build: 
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: jira-voice-bot-backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "${API_PORT:-3001}:3001"
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: 3001
+      # Original TypeORM style connection parameters
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USERNAME: ${DB_USERNAME:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+      DB_DATABASE: ${DB_DATABASE:-jira_voice_bot}
+      # JWT settings
+      JWT_SECRET: ${JWT_SECRET:-defaultsecretkey}
+      JWT_ACCESS_EXPIRATION: ${JWT_ACCESS_EXPIRATION:-15m}
+      JWT_REFRESH_EXPIRATION: ${JWT_REFRESH_EXPIRATION:-7d}
+      # Redis settings
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      # CORS settings
+      CORS_ORIGIN: http://localhost:3005
+    networks:
+      - jira-voice-bot-network
+    restart: unless-stopped
+
+  # Frontend Development Server
+  frontend-dev:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    image: node:22-alpine
+    container_name: jira-voice-bot-frontend
+    ports:
+      - "${FRONTEND_PORT:-3005}:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    working_dir: /app
+    environment:
+      NODE_ENV: development
+      NEXT_PUBLIC_API_URL: http://backend:3001
+      NEXT_PUBLIC_APP_URL: http://localhost:3005
+    depends_on:
+      - backend
+    networks:
+      - jira-voice-bot-network
+
+networks:
+  jira-voice-bot-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data: 
