@@ -5,6 +5,8 @@ import { systemApi, SystemHealth, SystemVersion } from "@/lib/api";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { RefreshCw } from "lucide-react";
 
 export function SystemStatus() {
   const [health, setHealth] = useState<SystemHealth | null>(null);
@@ -12,25 +14,25 @@ export function SystemStatus() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchSystemStatus = async () => {
-      setLoading(true);
-      try {
-        const [healthData, versionData] = await Promise.all([
-          systemApi.getStatus(),
-          systemApi.getVersion()
-        ]);
-        setHealth(healthData);
-        setVersion(versionData);
-        setError(null);
-      } catch (err) {
-        console.error("Failed to fetch system status:", err);
-        setError("Failed to load system status. Please try again later.");
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchSystemStatus = async () => {
+    setLoading(true);
+    try {
+      const [healthData, versionData] = await Promise.all([
+        systemApi.getStatus(),
+        systemApi.getVersion()
+      ]);
+      setHealth(healthData);
+      setVersion(versionData);
+      setError(null);
+    } catch (err) {
+      console.error("Failed to fetch system status:", err);
+      setError("Failed to load system status. Please try again later.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchSystemStatus();
   }, []);
 
@@ -82,9 +84,20 @@ export function SystemStatus() {
 
   return (
     <Card className="w-full" data-cy="system-status">
-      <CardHeader>
-        <CardTitle>System Status</CardTitle>
-        <CardDescription>Current system health and version information</CardDescription>
+      <CardHeader className="flex flex-row items-center justify-between">
+        <div>
+          <CardTitle>System Status</CardTitle>
+          <CardDescription>Current system health and version information</CardDescription>
+        </div>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={fetchSystemStatus}
+          data-cy="refresh-button"
+          title="Refresh status"
+        >
+          <RefreshCw className="h-4 w-4" />
+        </Button>
       </CardHeader>
       <CardContent>
         <div className="space-y-6">

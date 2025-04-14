@@ -2,15 +2,15 @@ import { Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { VoiceCommandHistory } from '../database/entities/voice-command-history.entity';
-import { UserService } from '../user/user.service';
+import { UsersService } from '../users/services/users.service';
 import { OpenRouterService } from '../external/openrouter.service';
+import { OpenAIService } from '../external/openai.service';
 import { User } from '../database/entities/user.entity';
 import { ConfigService } from '@nestjs/config';
 import {
   UsageStatistics,
   VoiceModel,
   CommandInterpretation,
-  TranscriptionResult,
 } from '../types/voice.types';
 
 /**
@@ -23,9 +23,10 @@ export class VoiceService {
   constructor(
     @InjectRepository(VoiceCommandHistory)
     private voiceHistoryRepository: Repository<VoiceCommandHistory>,
-    private userService: UserService,
+    private usersService: UsersService,
     private readonly configService: ConfigService,
     private readonly openRouterService: OpenRouterService,
+    private readonly openAIService: OpenAIService,
   ) {}
 
   /**
@@ -66,7 +67,7 @@ export class VoiceService {
 
       // If audio, transcribe first
       if (type === 'audio') {
-        transcript = await this.openRouterService.transcribe(content, format);
+        transcript = await this.transcribeAudio(content, format || 'webm');
         historyEntry.transcript = transcript;
         await this.voiceHistoryRepository.save(historyEntry);
       } else {
@@ -151,7 +152,7 @@ export class VoiceService {
     entities: any,
     _context?: Record<string, any>,
   ) {
-    const user = await this.userService.findOne(userId);
+    const user = await this.usersService.findById(userId);
     if (!user) {
       throw new Error('User not found');
     }
@@ -473,12 +474,42 @@ export class VoiceService {
     );
   }
 
+  /**
+   * Transcribe audio data to text
+   * @param audioData Base64 encoded audio data
+   * @param format Audio format (e.g., 'webm', 'wav')
+   */
   async transcribeAudio(audioData: string, format: string): Promise<string> {
+    this.logger.debug(`Starting audio transcription. Format: ${format}`);
+    this.logger.debug(`Audio data size: ${(audioData.length * 3) / 4} bytes`);
+
     try {
-      const result = await this.openRouterService.transcribe(audioData, format);
-      return (result as unknown as TranscriptionResult)?.transcript || '';
+      await this.validateConfiguration();
+      this.logger.debug('Configuration validated successfully');
+
+      this.logger.debug('Starting Whisper transcription via OpenAI');
+      const startTime = Date.now();
+      const transcript = await this.openAIService.transcribe(audioData, format);
+      const duration = Date.now() - startTime;
+
+      this.logger.debug(`Transcription completed in ${duration}ms`);
+      this.logger.debug(`Transcript length: ${transcript.length} characters`);
+
+      if (!transcript) {
+        throw new Error('Received empty transcript from Whisper');
+      }
+
+      return transcript;
     } catch (error: unknown) {
-      return this.handleError(error);
+      this.logger.error(
+        'Error in transcribeAudio:',
+        error instanceof Error ? error.stack : 'Unknown error',
+      );
+      if (error instanceof Error) {
+        this.logger.error(`Error message: ${error.message}`);
+        throw error;
+      }
+      throw new Error('Failed to transcribe audio');
     }
   }
 
@@ -529,11 +560,11 @@ export class VoiceService {
     await Promise.resolve();
   }
 
-  private async validateContext(context: Record<string, any>): Promise<void> {
+  private async validateContext(_context: Record<string, any>): Promise<void> {
     await Promise.resolve();
   }
 
-  private async validateUserPermissions(user: User): Promise<void> {
+  private async validateUserPermissions(_user: User): Promise<void> {
     await Promise.resolve();
   }
 }

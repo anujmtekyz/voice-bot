@@ -6,13 +6,13 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../../users/services/users.service';
 import { User } from '../../database/entities/user.entity';
-import { JwtPayload } from '../interfaces/jwt-payload.interface';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { RefreshToken } from '../../database/entities/refresh-token.entity';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
+import { CreateUserDto } from '../../users/dto/create-user.dto';
 
 /**
  * Service for handling authentication operations
@@ -36,6 +36,35 @@ export class AuthService {
   ) {}
 
   /**
+   * Register a new user
+   *
+   * @param {CreateUserDto} createUserDto - User registration data
+   * @returns {Promise<{ user: User; accessToken: string; refreshToken: string }>} Created user and tokens
+   */
+  async register(
+    createUserDto: CreateUserDto,
+  ): Promise<{ user: User; accessToken: string; refreshToken: string }> {
+    // Create the user
+    const user = await this.usersService.create(createUserDto);
+
+    // Generate tokens
+    const payload = {
+      sub: user.id,
+      email: user.email,
+      role: user.role,
+    };
+
+    const accessToken = this.jwtService.sign(payload);
+    const refreshToken = await this.generateRefreshToken(user.id);
+
+    return {
+      user,
+      accessToken,
+      refreshToken,
+    };
+  }
+
+  /**
    * Validates user credentials
    *
    * @param {string} email - User's email address
@@ -49,14 +78,14 @@ export class AuthService {
   /**
    * Creates JWT tokens for authenticated user
    *
-   * @param {JwtPayload} user - User data for JWT payload
+   * @param {any} user - User data
    * @returns {Promise<{ accessToken: string; refreshToken: string }>} JWT tokens
    */
   async login(
-    user: JwtPayload,
+    user: any,
   ): Promise<{ accessToken: string; refreshToken: string }> {
     const payload = {
-      sub: user.sub,
+      sub: user.id,
       email: user.email,
       role: user.role,
     };
@@ -65,7 +94,7 @@ export class AuthService {
     const accessToken = this.jwtService.sign(payload);
 
     // Generate refresh token
-    const refreshToken = await this.generateRefreshToken(user.sub);
+    const refreshToken = await this.generateRefreshToken(user.id);
 
     return {
       accessToken,

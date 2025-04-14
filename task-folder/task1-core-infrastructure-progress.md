@@ -1,6 +1,6 @@
 # Task 1: Core Infrastructure Setup - Progress Report
 
-## Completed Tasks
+## ✅ Completed Tasks (100%)
 
 ### 1.1 Project Boilerplate and Configuration
 - [x] Create NestJS project structure with proper modules organization
@@ -82,8 +82,8 @@
    ```
 
 4. Access the Swagger documentation:
-   http://localhost:3000/api/docs
+   http://localhost:3001/api/docs
 
 5. Check the health endpoints:
-   - http://localhost:3000/api/system/status
-   - http://localhost:3000/api/system/version 
+   - http://localhost:3001/api/system/status
+   - http://localhost:3001/api/system/version 

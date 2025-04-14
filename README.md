@@ -1,103 +1,73 @@
-# Voice Bot
+# Voice Bot Project
 
-A full-stack application for voice-controlled task management with authentication, integrating with Jira-like project management systems.
+A voice-enabled bot for interacting with JIRA using natural language commands.
 
-## Features
+## Documentation Structure
 
-- User Authentication with JWT
-- Voice Command Processing
-- Task Management
-- Admin Dashboard
+The project documentation is organized in the following categories:
 
-## Prerequisites
+### Architecture (`docs/architecture/`)
+- `services-architecture.md` - Overall service architecture and design
+- `testing-architecture.md` - Testing architecture and strategy
 
+### API (`docs/api/`)
+- `api-requirements.md` - API specifications and requirements
+- `openrouter-feasibility.md` - OpenRouter integration feasibility study
+- `system-api-integration.md` - System API integration guide
+
+### Testing (`docs/testing/`)
+- Test plans and results
+- Integration testing guides
+- Authentication testing documentation
+- Cypress integration guides
+
+### Deployment (`docs/deployment/`)
+- `production-details.md` - Production deployment guide and considerations
+
+## Quick Start
+
+1. Clone the repository
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Set up environment variables:
+   ```bash
+   cp .env.example .env
+   ```
+
+4. Start the development environment:
+   ```bash
+   docker compose up -d
+   ```
+
+The application will be available at:
+- Frontend: http://localhost:3005
+- Backend API: http://localhost:3001
+
+## Development
+
+### Prerequisites
+- Node.js 20+
 - Docker and Docker Compose
-- Node.js 18 or later (if running locally)
-- pnpm (if running locally)
+- PostgreSQL 15 (if running locally)
+- Redis 7 (if running locally)
 
-## Running with Docker
+### Available Scripts
 
-The easiest way to get started is using Docker Compose, which will set up the entire environment including:
+- `npm run dev` - Start the development server
+- `npm run build` - Build for production
+- `npm run start` - Start the production server
+- `npm run test` - Run tests
+- `npm run test:coverage` - Run tests with coverage
+- `npm run cypress` - Open Cypress test runner
+- `npm run cypress:run` - Run Cypress tests headlessly
 
-- PostgreSQL database
-- Redis cache
-- Backend API server
-- Frontend application
+## Contributing
 
-### Step 1: Set up environment variables
-
-```bash
-cp .env.example .env
-```
-
-Edit the `.env` file and update any required variables, particularly:
-- Database credentials (if needed)
-- JWT secret (use a strong secret for production)
-- OpenRouter API key (if using voice features)
-
-### Step 2: Start the services
-
-```bash
-docker-compose up -d
-```
-
-This will start all services. The first run will take longer as it builds the images.
-
-### Step 3: Access the application
-
-- Frontend: http://localhost:3000
-- Backend API: http://localhost:3001/api
-- API Documentation: http://localhost:3001/api/docs
-
-### Test Accounts
-
-The seed data creates two test accounts:
-
-1. Admin User:
-   - Email: admin@example.com
-   - Password: AdminPassword123!
-
-2. Regular User:
-   - Email: user@example.com
-   - Password: Password123!
-
-## Running Locally (Development)
-
-If you prefer to run the application without Docker:
-
-### Backend
-
-```bash
-cd server
-cp .env.example .env  # Configure your environment
-pnpm install
-pnpm run migration:run  # Initialize the database
-pnpm run seed  # Seed initial data
-pnpm run start:dev  # Start the backend in development mode
-```
-
-### Frontend
-
-```bash
-pnpm install
-pnpm run dev  # Start the frontend in development mode
-```
-
-## Database Migrations
-
-To create a new migration after changing entities:
-
-```bash
-cd server
-pnpm run migration:generate -- src/database/migrations/YourMigrationName
-```
-
-To run pending migrations:
-
-```bash
-pnpm run migration:run
-```
+Please read through our contributing guidelines in the documentation.
 
 ## License
 
-[MIT License](LICENSE) 
+This project is proprietary and confidential. 

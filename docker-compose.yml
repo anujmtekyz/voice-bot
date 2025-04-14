@@ -1,14 +1,15 @@
-version: '3.8'
+version: "3.8"
 
 services:
   # Database
   postgres:
     image: postgres:15-alpine
     container_name: jira-voice-bot-postgres
+    env_file: .env
     environment:
       POSTGRES_USER: ${DB_USERNAME:-postgres}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
-      POSTGRES_DB: ${DB_DATABASE:-jira_voice_bot}
+      POSTGRES_DB: ${DB_DATABASE:-jira_voice_bot_dev}
     ports:
       - "${DB_PORT:-5432}:5432"
     volumes:
@@ -17,7 +18,11 @@ services:
       - jira-voice-bot-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-postgres} -d ${DB_DATABASE:-jira_voice_bot}"]
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${DB_USERNAME:-postgres} -d ${DB_DATABASE:-jira_voice_bot_dev}",
+        ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -26,6 +31,7 @@ services:
   redis:
     image: redis:7-alpine
     container_name: jira-voice-bot-redis
+    env_file: .env
     ports:
       - "${REDIS_PORT:-6379}:6379"
     volumes:
@@ -41,10 +47,14 @@ services:
 
   # Backend API
   backend:
-    build: 
+    build:
       context: ./server
       dockerfile: Dockerfile
     container_name: jira-voice-bot-backend
+    env_file:
+      - .env
+      - server/.env
+      - server/.env.development
     depends_on:
       postgres:
         condition: service_healthy
@@ -53,48 +63,63 @@ services:
     ports:
       - "${API_PORT:-3001}:3001"
     environment:
-      NODE_ENV: ${NODE_ENV:-production}
+      NODE_ENV: ${NODE_ENV:-development}
       PORT: 3001
-      # Original TypeORM style connection parameters
+      # Logging Configuration
+      LOG_LEVEL: ${LOG_LEVEL:-debug}
+      # Database Configuration
       DB_HOST: postgres
       DB_PORT: 5432
       DB_USERNAME: ${DB_USERNAME:-postgres}
       DB_PASSWORD: ${DB_PASSWORD:-postgres}
-      DB_DATABASE: ${DB_DATABASE:-jira_voice_bot}
+      DB_DATABASE: ${DB_DATABASE:-jira_voice_bot_dev}
       # JWT settings
-      JWT_SECRET: ${JWT_SECRET:-defaultsecretkey}
+      JWT_SECRET: ${JWT_SECRET:-dev-secret-key-change-in-production}
       JWT_ACCESS_EXPIRATION: ${JWT_ACCESS_EXPIRATION:-15m}
       JWT_REFRESH_EXPIRATION: ${JWT_REFRESH_EXPIRATION:-7d}
       # Redis settings
       REDIS_HOST: redis
       REDIS_PORT: 6379
+      # Rate Limiting
+      THROTTLE_TTL: ${THROTTLE_TTL:-60}
+      THROTTLE_LIMIT: ${THROTTLE_LIMIT:-10}
+      # OpenAI Configuration
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-3.5-turbo}
+      OPENAI_MAX_TOKENS: ${OPENAI_MAX_TOKENS:-150}
+      OPENAI_TEMPERATURE: ${OPENAI_TEMPERATURE:-0.7}
+      # OpenRouter Configuration
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
+      OPENROUTER_BASE_URL: ${OPENROUTER_BASE_URL:-https://openrouter.ai/api/v1}
       # CORS settings
-      CORS_ORIGIN: http://localhost:3005
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3005}
     networks:
       - jira-voice-bot-network
     restart: unless-stopped
 
   # Frontend Development Server
-  frontend-dev:
-    build: 
+  frontend:
+    build:
       context: .
       dockerfile: Dockerfile
-    image: node:22-alpine
+      target: runner
     container_name: jira-voice-bot-frontend
+    env_file:
+      - .env
+      - .env.development
     ports:
       - "${FRONTEND_PORT:-3005}:3000"
-    volumes:
-      - .:/app
-      - /app/node_modules
-    working_dir: /app
     environment:
-      NODE_ENV: development
-      NEXT_PUBLIC_API_URL: http://backend:3001
-      NEXT_PUBLIC_APP_URL: http://localhost:3005
+      NODE_ENV: ${NODE_ENV:-development}
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3001/api}
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3005}
+      # OpenRouter Configuration (if needed on frontend)
+      NEXT_PUBLIC_OPENROUTER_BASE_URL: ${OPENROUTER_BASE_URL:-https://openrouter.ai/api/v1}
     depends_on:
       - backend
     networks:
       - jira-voice-bot-network
+    restart: unless-stopped
 
 networks:
   jira-voice-bot-network:
@@ -102,4 +127,4 @@ networks:
 
 volumes:
   postgres_data:
-  redis_data: 
+  redis_data:

@@ -10,6 +10,7 @@ import {
   Request,
   HttpStatus,
   HttpException,
+  Logger,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -22,10 +23,12 @@ import { VoiceService } from './voice.service';
 import { RequestWithUser } from '../types/request.types';
 
 @ApiTags('Voice Commands')
-@Controller('api/voice')
+@Controller('voice')
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
 export class VoiceController {
+  private readonly logger = new Logger(VoiceController.name);
+
   constructor(private readonly voiceService: VoiceService) {}
 
   @Post('process')
@@ -214,12 +217,30 @@ export class VoiceController {
       language?: string;
     },
   ) {
+    this.logger.debug(
+      `Transcribe request received. Format: ${body.format}, Model: ${body.model}, Language: ${body.language}`,
+    );
+    this.logger.debug(`Audio data length: ${body.audio.length} characters`);
+
     try {
-      return await this.voiceService.transcribeAudio(
+      const startTime = Date.now();
+      const result = await this.voiceService.transcribeAudio(
         body.audio,
         body.format || '',
       );
+      const duration = Date.now() - startTime;
+
+      this.logger.debug(`Transcription completed in ${duration}ms`);
+      this.logger.debug(
+        `Transcription result length: ${result.length} characters`,
+      );
+
+      return result;
     } catch (error: unknown) {
+      this.logger.error(
+        'Transcription error:',
+        error instanceof Error ? error.stack : 'Unknown error',
+      );
       if (error instanceof Error) {
         throw new HttpException(
           error.message,
@@ -276,6 +297,39 @@ export class VoiceController {
         'Failed to fetch usage statistics',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
+    }
+  }
+
+  @Post('login/transcribe')
+  async transcribeLoginAudio(
+    @Body() data: { audioData: string; format: string },
+  ) {
+    this.logger.debug(
+      `Login transcribe request received. Format: ${data.format}`,
+    );
+    this.logger.debug(`Audio data length: ${data.audioData.length} characters`);
+
+    try {
+      const startTime = Date.now();
+      const transcript = await this.voiceService.transcribeAudio(
+        data.audioData,
+        data.format,
+      );
+      const duration = Date.now() - startTime;
+
+      this.logger.debug(`Login transcription completed in ${duration}ms`);
+      this.logger.debug(`Transcription result: ${transcript}`);
+
+      return { success: true, transcript };
+    } catch (error) {
+      this.logger.error(
+        'Login transcription error:',
+        error instanceof Error ? error.stack : 'Unknown error',
+      );
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Transcription failed',
+      };
     }
   }
 }

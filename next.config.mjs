@@ -12,7 +12,9 @@ try {
 }
 
 /** @type {import('next').NextConfig} */
-const nextConfig = {
+const config = {
+  output: 'standalone',
+  reactStrictMode: true,
   eslint: {
     ignoreDuringBuilds: true,
   },
@@ -23,9 +25,9 @@ const nextConfig = {
     unoptimized: true,
   },
   experimental: {
-    webpackBuildWorker: true,
-    parallelServerBuildTraces: true,
-    parallelServerCompiles: true,
+    serverActions: {
+      allowedOrigins: ['localhost:3005'],
+    },
   },
 }
 
@@ -48,4 +50,4 @@ if (userConfig) {
   }
 }
 
-export default nextConfig
+export default config

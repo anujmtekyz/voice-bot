@@ -4,11 +4,37 @@ import { useState } from "react"
 import Link from "next/link"
 import { Mic } from "lucide-react"
 import { LoginForm } from "./login-form"
+import { VoiceLoginModal } from "./voice-login-modal"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { Logo } from "@/components/ui/logo"
+import { useAuth } from "@/hooks/use-auth"
+import { useToast } from "@/hooks/use-toast"
 
 export function LoginPage() {
   const [isVoiceLoginActive, setIsVoiceLoginActive] = useState(false)
+  const { login } = useAuth()
+  const { toast } = useToast()
+
+  const handleVoiceInput = async (email: string, password: string) => {
+    try {
+      const success = await login({ email, password }, false)
+      if (!success) {
+        toast({
+          title: "Login failed",
+          description: "Please check your credentials and try again.",
+          variant: "destructive",
+        })
+      }
+    } catch (error: any) {
+      toast({
+        title: "Login failed",
+        description: error.response?.data?.message || "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsVoiceLoginActive(false)
+    }
+  }
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -49,34 +75,6 @@ export function LoginPage() {
                 </li>
               </ul>
             </div>
-
-            {isVoiceLoginActive && (
-              <div className="flex flex-col items-center justify-center space-y-4 rounded-lg border bg-card p-6 text-center shadow-sm">
-                <div className="relative">
-                  <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary/10">
-                    <Mic className="h-8 w-8 text-primary" />
-                  </div>
-                  <span className="absolute right-0 top-0 flex h-5 w-5 animate-pulse items-center justify-center rounded-full bg-red-500"></span>
-                </div>
-                <div className="space-y-2">
-                  <h3 className="font-medium">Voice Authentication</h3>
-                  <p className="text-sm text-muted-foreground">Say "My voice is my password"</p>
-                  <div className="flex justify-center space-x-2">
-                    <div className="flex items-center space-x-1">
-                      <span className="h-2 w-2 animate-pulse rounded-full bg-primary"></span>
-                      <span className="h-2 w-2 animate-pulse rounded-full bg-primary animation-delay-200"></span>
-                      <span className="h-2 w-2 animate-pulse rounded-full bg-primary animation-delay-500"></span>
-                    </div>
-                  </div>
-                </div>
-                <button
-                  className="text-sm text-muted-foreground underline"
-                  onClick={() => setIsVoiceLoginActive(false)}
-                >
-                  Cancel
-                </button>
-              </div>
-            )}
           </div>
 
           {/* Right side - Login form */}
@@ -106,6 +104,12 @@ export function LoginPage() {
       <footer className="border-t py-4 text-center text-sm text-muted-foreground">
         <p>© {new Date().getFullYear()} JIRA VoiceBot. All rights reserved.</p>
       </footer>
+
+      <VoiceLoginModal
+        isOpen={isVoiceLoginActive}
+        onClose={() => setIsVoiceLoginActive(false)}
+        onVoiceInput={handleVoiceInput}
+      />
     </div>
   )
 }

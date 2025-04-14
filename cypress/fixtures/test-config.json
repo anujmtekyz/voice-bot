@@ -1,0 +1,27 @@
+{
+  "users": {
+    "admin": {
+      "email": "admin@example.com",
+      "password": "AdminPassword123!"
+    },
+    "user": {
+      "email": "user@example.com",
+      "password": "UserPassword123!"
+    }
+  },
+  "api": {
+    "baseUrl": "http://localhost:3001/api",
+    "endpoints": {
+      "auth": "/auth",
+      "voice": "/voice",
+      "system": "/system"
+    }
+  },
+  "testData": {
+    "voiceCommands": {
+      "createTicket": "Create a new ticket for login issue",
+      "findTickets": "Show my open tickets",
+      "updateTicket": "Update ticket DEMO-123 status to in progress"
+    }
+  }
+} 

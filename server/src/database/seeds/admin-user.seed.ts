@@ -21,7 +21,7 @@ export const seedAdminUser = async (dataSource: DataSource): Promise<void> => {
   try {
     // Create admin user
     const hashedPassword = await bcrypt.hash('AdminPassword123!', 10);
-    
+
     const adminUser = userRepository.create({
       email: 'admin@example.com',
       password: hashedPassword,
@@ -53,7 +53,7 @@ export const seedAdminUser = async (dataSource: DataSource): Promise<void> => {
 
     // Create regular test user
     const testUserPassword = await bcrypt.hash('Password123!', 10);
-    
+
     const testUser = userRepository.create({
       email: 'user@example.com',
       password: testUserPassword,

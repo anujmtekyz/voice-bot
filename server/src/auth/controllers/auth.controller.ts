@@ -16,6 +16,7 @@ import { LoginDto } from '../dto/login.dto';
 import { RefreshTokenDto } from '../dto/refresh-token.dto';
 import { ForgotPasswordDto } from '../dto/forgot-password.dto';
 import { ResetPasswordDto } from '../dto/reset-password.dto';
+import { CreateUserDto } from '../../users/dto/create-user.dto';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -35,6 +36,20 @@ export class AuthController {
    * @param {AuthService} authService - Service handling authentication logic
    */
   constructor(private readonly authService: AuthService) {}
+
+  /**
+   * Register a new user
+   *
+   * @param {CreateUserDto} createUserDto - User registration data
+   * @returns {Promise<object>} Newly created user data
+   */
+  @ApiOperation({ summary: 'Register a new user' })
+  @ApiResponse({ status: 201, description: 'User registered successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid registration data' })
+  @Post('register')
+  async register(@Body() createUserDto: CreateUserDto) {
+    return this.authService.register(createUserDto);
+  }
 
   /**
    * Authenticates a user and returns tokens

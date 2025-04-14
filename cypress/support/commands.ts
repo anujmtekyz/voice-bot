@@ -11,11 +11,15 @@
 // ***********************************************
 
 // -- This is a parent command --
-Cypress.Commands.add('login', (email, password) => {
-  cy.visit('/login');
-  cy.get('[data-cy=email-input]').type(email);
-  cy.get('[data-cy=password-input]').type(password);
-  cy.get('[data-cy=login-button]').click();
+Cypress.Commands.add('login', (email: string, password: string) => {
+  cy.request({
+    method: 'POST',
+    url: `${Cypress.env('apiUrl')}/auth/login`,
+    body: { email, password },
+  }).then((response) => {
+    window.localStorage.setItem('token', response.body.accessToken);
+    return response.body;
+  });
 });
 
 // Command to check system status component elements
@@ -118,7 +122,7 @@ Cypress.Commands.add('until', { prevSubject: 'element' }, (subject, predicate, o
 declare global {
   namespace Cypress {
     interface Chainable {
-      login(email: string, password: string): Chainable<void>
+      login(email: string, password: string): Chainable<any>
       checkSystemStatusComponent(): Chainable<void>
       tab(options?: { shift?: boolean, multiple?: boolean }): Chainable<JQuery<HTMLElement>>
       until(predicate: (el: JQuery<HTMLElement>) => boolean, options?: { maxAttempts?: number, delay?: number }): Chainable<JQuery<HTMLElement>>
@@ -130,6 +134,9 @@ declare global {
        * @example cy.loginUser('email@example.com', 'password123')
        */
       loginUser(email: string, password: string): Chainable<void>
+      apiRequest(method: string, path: string, body?: any): Chainable<any>
+      testVoiceCommand(command: string, expectedResponse: string): Chainable<any>
+      clearTestData(): Chainable<any>
     }
   }
 }
@@ -141,6 +148,40 @@ Cypress.Commands.add('loginUser', (email: string, password: string) => {
   cy.get('[data-testid=password]').type(password);
   cy.get('[data-testid=login-button]').click();
   cy.wait('@loginRequest');
+});
+
+// API request with auth token
+Cypress.Commands.add('apiRequest', (method: string, path: string, body?: any) => {
+  const token = window.localStorage.getItem('token');
+  return cy.request({
+    method,
+    url: `${Cypress.env('apiUrl')}${path}`,
+    body,
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+});
+
+// Voice command test helper
+Cypress.Commands.add('testVoiceCommand', (command: string, expectedResponse: string) => {
+  cy.apiRequest('POST', '/voice/command', {
+    type: 'text',
+    content: command,
+  }).then((response) => {
+    expect(response.body).to.have.property('success', true);
+    if (expectedResponse) {
+      expect(response.body.response.message).to.include(expectedResponse);
+    }
+  });
+});
+
+// Clear test data
+Cypress.Commands.add('clearTestData', () => {
+  const token = window.localStorage.getItem('token');
+  if (token) {
+    cy.apiRequest('POST', '/test/cleanup');
+  }
 });
 
 export {}; 

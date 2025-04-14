@@ -4,6 +4,7 @@ import { Outfit } from "next/font/google"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { AuthProvider } from "@/hooks/use-auth"
+import { ToastProvider } from '@/components/providers/toast-provider'
 
 // Load Outfit font - a modern, clean sans-serif
 const outfit = Outfit({
@@ -42,6 +43,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning className={outfit.variable}>
       <body className="font-sans">
+        <ToastProvider />
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
           <AuthProvider>
             {children}

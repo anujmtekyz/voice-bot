@@ -22,7 +22,7 @@
     "migration:generate": "npm run typeorm -- migration:generate -d src/database/data-source.ts",
     "migration:run": "ts-node -r tsconfig-paths/register src/database/migration.ts",
     "migration:revert": "npm run typeorm -- migration:revert -d src/database/data-source.ts",
-    "seed": "ts-node -r tsconfig-paths/register src/database/seeds/seed.ts"
+    "seed": "ts-node src/database/seed.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.15",
@@ -36,6 +36,7 @@
     "@nestjs/typeorm": "^11.0.0",
     "@types/bcrypt": "^5.0.2",
     "@types/bcryptjs": "^3.0.0",
+    "@types/form-data": "^2.2.1",
     "@types/passport-jwt": "^4.0.1",
     "@types/uuid": "^10.0.0",
     "axios": "^1.8.4",
@@ -44,8 +45,11 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
     "dotenv": "^16.5.0",
+    "form-data": "^4.0.2",
     "helmet": "^8.1.0",
+    "joi": "^17.13.3",
     "js-cookie": "^3.0.5",
+    "openai": "^4.93.0",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",
@@ -53,6 +57,7 @@
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
     "typeorm": "^0.3.22",
+    "typeorm-extension": "^3.7.0",
     "uuid": "^11.1.0",
     "winston": "^3.17.0",
     "winston-daily-rotate-file": "^5.0.0"
