@@ -3,6 +3,7 @@
 This task focuses on setting up the core infrastructure for the JIRA Voice Bot application, establishing the foundation for all subsequent development.
 
 ## Objectives
+
 - Set up NestJS project with TypeScript configuration
 - Configure database connections and ORM
 - Implement logging, error handling, and common utilities
@@ -11,22 +12,25 @@ This task focuses on setting up the core infrastructure for the JIRA Voice Bot a
 ## Subtasks
 
 ### 1.1 Project Boilerplate and Configuration
+
 - [x] Create NestJS project structure with proper modules organization
 - [x] Configure TypeScript with strict rules for code quality
 - [x] Set up environment variables and configuration management
-- [ ] Configure CORS for frontend integration
+- [x] Configure CORS for frontend integration
 - [ ] Create Docker Compose for local development
   - [ ] PostgreSQL service
   - [ ] Redis service for caching
 - [ ] Implement health check endpoints (`GET /api/system/status` and `GET /api/system/version`)
 
 ### 1.2 Swagger API Documentation
-- [ ] Install and configure Swagger for API documentation
-- [ ] Set up base Swagger configuration with authentication
-- [ ] Create API description and tags matching API requirements
+
+- [x] Install and configure Swagger for API documentation
+- [x] Set up base Swagger configuration with authentication
+- [x] Create API description and tags matching API requirements
 - [ ] Configure example request/response models
 
 ### 1.3 Database Setup
+
 - [ ] Implement TypeORM configuration for PostgreSQL
 - [ ] Set up database migration system
 - [ ] Create base entity classes with common fields
@@ -35,30 +39,34 @@ This task focuses on setting up the core infrastructure for the JIRA Voice Bot a
 - [ ] Set up transaction management
 
 ### 1.4 Error Handling
-- [ ] Create global exception filter
-- [ ] Implement custom exception classes
-  - [ ] Application exception base class
-  - [ ] Entity not found exception
-  - [ ] Validation exception
-  - [ ] Authentication exceptions
-  - [ ] Authorization exceptions
-- [ ] Configure request validation using class-validator
-- [ ] Implement error logging middleware
+
+- [x] Create global exception filter (Using existing HttpExceptionFilter from main.ts)
+- [x] Implement custom exception classes
+  - [x] Application exception base class
+  - [x] Entity not found exception
+  - [x] Validation exception
+  - [x] Authentication exceptions
+  - [x] Authorization exceptions
+- [x] Configure request validation using class-validator (Via global ValidationPipe in main.ts)
+- [~] Implement error logging middleware (Errors logged via global filter + CustomLogger)
 
 ### 1.5 Response Formatting
+
 - [ ] Create standard response format interceptor
 - [ ] Implement pagination helper for list endpoints
 - [ ] Set up response serialization with class-transformer
 - [ ] Create helper functions for success/error responses
 
 ### 1.6 Logging Service
-- [ ] Set up Winston logger integration
-- [ ] Configure different log levels based on environment
+
+- [~] Set up Winston logger integration (Implemented using CustomLogger extending ConsoleLogger)
+- [x] Configure different log levels based on environment
 - [ ] Implement request logging middleware
-- [ ] Create context-based logging utility
-- [ ] Set up log rotation for production
+- [x] Create context-based logging utility (Leverages NestJS context)
+- [-] ~~Set up log rotation for production~~ (File logging removed)
 
 ### 1.7 Testing Infrastructure
+
 - [ ] Configure Jest for unit testing
 - [ ] Set up test database for integration tests
 - [ ] Create test utilities and mocks
@@ -73,6 +81,7 @@ GET /api/system/version - Get application version
 ```
 
 ## Verification Criteria
+
 - Docker containers run successfully
 - Database connection is established and migrations work
 - Logging is properly configured with different levels
@@ -82,12 +91,14 @@ GET /api/system/version - Get application version
 - Health check endpoints return proper system status
 
 ## Dependencies
+
 - NestJS framework knowledge
 - TypeORM experience
 - Docker and Docker Compose
-- PostgreSQL 
+- PostgreSQL
 - Redis
 - Understanding of API requirements document
 
 ## Estimated Time
-- 2-3 days 
+
+- 2-3 days

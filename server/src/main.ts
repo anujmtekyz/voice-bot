@@ -23,8 +23,6 @@ async function bootstrap() {
     logger: isProduction
       ? ['log', 'warn', 'error']
       : ['log', 'error', 'warn', 'debug', 'verbose'],
-    // Alternatively, pass the created instance directly:
-    // logger: logger
   });
 
   // Replace the default logger instance used by the app
