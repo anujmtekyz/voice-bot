@@ -15,13 +15,23 @@ export class DatabaseConfig implements TypeOrmOptionsFactory {
   constructor(private configService: ConfigService) {}
 
   createTypeOrmOptions(): TypeOrmModuleOptions {
+    const isProduction =
+      this.configService.get<string>('environment') === 'production';
+    const isTest = this.configService.get<string>('environment') === 'test';
+
+    let dbName = this.configService.get<string>('database.database');
+    if (isTest) {
+      dbName = `${dbName}_test`; // Use a separate database for testing
+      console.log(`Using test database: ${dbName}`); // Log confirmation
+    }
+
     return {
       type: 'postgres',
       host: this.configService.get<string>('database.host'),
       port: this.configService.get<number>('database.port'),
       username: this.configService.get<string>('database.username'),
       password: this.configService.get<string>('database.password'),
-      database: this.configService.get<string>('database.database'),
+      database: dbName, // Use potentially modified dbName
       entities: [
         User,
         UserSettings,
@@ -32,10 +42,12 @@ export class DatabaseConfig implements TypeOrmOptionsFactory {
         Report,
         Notification,
       ],
-      synchronize:
-        this.configService.get<string>('environment') !== 'production',
+      // Synchronize schema in dev/test, migrations in prod
+      synchronize: !isProduction,
       logging: this.configService.get<boolean>('database.logging'),
       ssl: this.configService.get<boolean>('database.ssl'),
+      // Drop schema can be useful in test environment to start fresh, use with caution
+      // dropSchema: isTest,
     };
   }
 }
