@@ -60,8 +60,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         description: `Welcome back${userData.firstName ? `, ${userData.firstName}` : ''}!`,
       });
       
-      // Redirect to dashboard
-      router.push('/dashboard');
+      // Check for callbackUrl in the URL search params
+      let redirectPath = '/dashboard';
+      if (typeof window !== 'undefined') {
+        const params = new URLSearchParams(window.location.search);
+        const callbackUrl = params.get('callbackUrl');
+        if (callbackUrl) {
+          redirectPath = decodeURI(callbackUrl);
+        }
+      }
+      
+      // Redirect to callback URL or dashboard
+      router.push(redirectPath);
       return true;
     } catch (error: any) {
       console.error('Login failed:', error);

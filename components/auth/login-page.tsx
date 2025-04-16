@@ -1,40 +1,41 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
-import { Mic } from "lucide-react"
+import { useSearchParams } from "next/navigation"
+import { Mic, AlertTriangle, ArrowRight } from "lucide-react"
 import { LoginForm } from "./login-form"
-import { VoiceLoginModal } from "./voice-login-modal"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { Logo } from "@/components/ui/logo"
 import { useAuth } from "@/hooks/use-auth"
 import { useToast } from "@/hooks/use-toast"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
 export function LoginPage() {
-  const [isVoiceLoginActive, setIsVoiceLoginActive] = useState(false)
   const { login } = useAuth()
   const { toast } = useToast()
+  const searchParams = useSearchParams()
+  const [sessionExpired, setSessionExpired] = useState(false)
+  const [callbackUrl, setCallbackUrl] = useState<string | null>(null)
 
-  const handleVoiceInput = async (email: string, password: string) => {
-    try {
-      const success = await login({ email, password }, false)
-      if (!success) {
-        toast({
-          title: "Login failed",
-          description: "Please check your credentials and try again.",
-          variant: "destructive",
-        })
-      }
-    } catch (error: any) {
+  useEffect(() => {
+    // Check if redirected from session expiry
+    const session = searchParams?.get('session')
+    if (session === 'expired') {
+      setSessionExpired(true)
       toast({
-        title: "Login failed",
-        description: error.response?.data?.message || "An unexpected error occurred. Please try again.",
+        title: "Session expired",
+        description: "Your session has expired. Please sign in again.",
         variant: "destructive",
       })
-    } finally {
-      setIsVoiceLoginActive(false)
     }
-  }
+    
+    // Check if there's a callback URL
+    const callback = searchParams?.get('callbackUrl')
+    if (callback) {
+      setCallbackUrl(decodeURI(callback))
+    }
+  }, [searchParams, toast])
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -84,10 +85,25 @@ export function LoginPage() {
               <p className="text-sm text-muted-foreground">Enter your credentials to access your account</p>
             </div>
 
-            <LoginForm
-              onVoiceLoginToggle={(active) => setIsVoiceLoginActive(active)}
-              isVoiceLoginActive={isVoiceLoginActive}
-            />
+            {sessionExpired && (
+              <Alert variant="destructive" className="mb-4">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertDescription>
+                  Your session has expired. Please sign in again.
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {callbackUrl && (
+              <Alert className="mb-4">
+                <ArrowRight className="h-4 w-4" />
+                <AlertDescription>
+                  Sign in to continue to {callbackUrl.replace(/^\//, '')}
+                </AlertDescription>
+              </Alert>
+            )}
+
+            <LoginForm />
 
             <div className="mt-6 text-center text-sm">
               <p className="text-muted-foreground">
@@ -104,12 +120,6 @@ export function LoginPage() {
       <footer className="border-t py-4 text-center text-sm text-muted-foreground">
         <p>© {new Date().getFullYear()} JIRA VoiceBot. All rights reserved.</p>
       </footer>
-
-      <VoiceLoginModal
-        isOpen={isVoiceLoginActive}
-        onClose={() => setIsVoiceLoginActive(false)}
-        onVoiceInput={handleVoiceInput}
-      />
     </div>
   )
 }

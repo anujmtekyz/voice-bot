@@ -9,6 +9,7 @@ import { Project } from './entities/project.entity';
 import { Issue } from './entities/issue.entity';
 import { Report } from './entities/report.entity';
 import { Notification } from './entities/notification.entity';
+import { VoiceSettings } from '../voice/entities/voice-settings.entity';
 
 @Injectable()
 export class DatabaseConfig implements TypeOrmOptionsFactory {
@@ -41,6 +42,7 @@ export class DatabaseConfig implements TypeOrmOptionsFactory {
         Issue,
         Report,
         Notification,
+        VoiceSettings,
       ],
       // Synchronize schema in dev/test, migrations in prod
       synchronize: !isProduction,

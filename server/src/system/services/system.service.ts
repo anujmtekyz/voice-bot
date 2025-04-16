@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectConnection } from '@nestjs/typeorm';
 import { Connection } from 'typeorm';
@@ -36,6 +36,8 @@ export interface SystemVersion {
  */
 @Injectable()
 export class SystemService {
+  private readonly logger = new Logger(SystemService.name);
+
   /**
    * Creates an instance of SystemService
    * @param configService NestJS configuration service
@@ -51,6 +53,8 @@ export class SystemService {
    * @returns The system health status
    */
   getHealth(): SystemHealth {
+    this.logger.log('Checking system health status');
+
     let databaseStatus = 'ok';
     let databaseMessage = 'Database connection is active';
     const redisStatus = 'ok';
@@ -61,20 +65,27 @@ export class SystemService {
       if (!this.connection.isConnected) {
         databaseStatus = 'error';
         databaseMessage = 'Database connection is not active';
+        this.logger.warn(
+          'Database connection is not active during health check',
+        );
       }
     } catch (error: unknown) {
       const err = error as Error;
       databaseStatus = 'error';
       databaseMessage = `Database error: ${err.message}`;
+      this.logger.error(
+        `Database error during health check: ${err.message}`,
+        err.stack,
+      );
     }
 
     // TODO: Check Redis connection (needs Redis client implementation)
-    // This is a placeholder for now
+    // This is a placeholder for now - in a real implementation, we would
+    // inject a Redis client and check its connection status
 
     const overallStatus =
       databaseStatus === 'ok' && redisStatus === 'ok' ? 'ok' : 'error';
-
-    return {
+    const healthStatus: SystemHealth = {
       status: overallStatus,
       timestamp: new Date().toISOString(),
       database: {
@@ -88,6 +99,9 @@ export class SystemService {
         },
       },
     };
+
+    this.logger.log(`Health check completed with status: ${overallStatus}`);
+    return healthStatus;
   }
 
   /**
@@ -95,11 +109,18 @@ export class SystemService {
    * @returns The system version
    */
   getVersion(): SystemVersion {
-    return {
+    this.logger.log('Retrieving system version information');
+
+    const versionInfo: SystemVersion = {
       version: this.configService.get<string>('npm_package_version', '1.0.0'),
       environment: this.configService.get<string>('NODE_ENV', 'development'),
       nodeVersion: process.version,
-      nestVersion: '11.0.0', // Hardcoded for now, should be dynamic in production
+      nestVersion: '11.0.0', // Ideally this should be dynamic rather than hardcoded
     };
+
+    this.logger.log(
+      `Version info retrieved: ${versionInfo.version} (${versionInfo.environment})`,
+    );
+    return versionInfo;
   }
 }

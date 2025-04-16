@@ -53,7 +53,9 @@ export function SystemStatus() {
       <Card className="w-full" data-cy="system-status-loading">
         <CardHeader>
           <CardTitle><Skeleton className="h-8 w-3/4" /></CardTitle>
-          <CardDescription><Skeleton className="h-4 w-1/2" /></CardDescription>
+          <div className="text-sm text-muted-foreground">
+            <Skeleton className="h-4 w-1/2" />
+          </div>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -82,6 +84,28 @@ export function SystemStatus() {
     );
   }
 
+  // Define services and their status - handle the case where services or parts of services are undefined
+  const dbStatus = health?.database?.status || 'error';
+  const dbMessage = health?.database?.message || 'No information available';
+  
+  // Safely access nested properties with proper typing
+  interface ServiceStatus {
+    status: 'ok' | 'error';
+    message: string;
+  }
+  
+  interface Services {
+    redis?: ServiceStatus;
+    [key: string]: ServiceStatus | undefined;
+  }
+  
+  const services: Services = health?.services || {};
+  const redisStatus = services.redis?.status || 'error';
+  const redisMessage = services.redis?.message || 'No information available';
+  
+  // Check if Redis service exists
+  const hasRedisService = !!services.redis;
+
   return (
     <Card className="w-full" data-cy="system-status">
       <CardHeader className="flex flex-row items-center justify-between">
@@ -106,7 +130,9 @@ export function SystemStatus() {
             <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-md">
               <div>
                 <p className="text-sm font-medium text-gray-500">Overall Status</p>
-                <div className="mt-1" data-cy="overall-status">{health && renderStatusBadge(health.status)}</div>
+                <div className="mt-1" data-cy="overall-status">
+                  {health && renderStatusBadge(health.status)}
+                </div>
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-500">Last Updated</p>
@@ -116,13 +142,21 @@ export function SystemStatus() {
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-500">Database</p>
-                <div className="mt-1" data-cy="database-status">{health?.database && renderStatusBadge(health.database.status)}</div>
-                <p className="text-xs text-gray-500 mt-1" data-cy="database-message">{health?.database.message}</p>
+                <div className="mt-1" data-cy="database-status">
+                  {health?.database && renderStatusBadge(dbStatus)}
+                </div>
+                <p className="text-xs text-gray-500 mt-1" data-cy="database-message">
+                  {dbMessage}
+                </p>
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-500">Redis</p>
-                <div className="mt-1" data-cy="redis-status">{health?.services.redis && renderStatusBadge(health.services.redis.status)}</div>
-                <p className="text-xs text-gray-500 mt-1" data-cy="redis-message">{health?.services.redis.message}</p>
+                <div className="mt-1" data-cy="redis-status">
+                  {hasRedisService && renderStatusBadge(redisStatus)}
+                </div>
+                <p className="text-xs text-gray-500 mt-1" data-cy="redis-message">
+                  {redisMessage}
+                </p>
               </div>
             </div>
           </div>

@@ -5,10 +5,10 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { VoiceModule } from './voice/voice.module';
+import { SystemModule } from './system/system.module';
 import configuration, { validationSchema } from './config/configuration';
 import { DatabaseConfig } from './database/database.config';
 import { OpenAIModule } from './external/openai.module';
-import { CustomLogger } from './common/logger/custom-logger.service';
 
 @Module({
   imports: [
@@ -34,8 +34,7 @@ import { CustomLogger } from './common/logger/custom-logger.service';
     UsersModule,
     VoiceModule,
     OpenAIModule,
+    SystemModule,
   ],
-  providers: [CustomLogger],
-  exports: [CustomLogger],
 })
 export class AppModule {}

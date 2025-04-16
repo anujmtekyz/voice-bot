@@ -1,32 +1,16 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, Logger } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 import * as bodyParser from 'body-parser';
-import { CustomLogger } from './common/logger/custom-logger.service';
 
 async function bootstrap() {
-  // Configure logger levels based on environment before app creation for early logs
-  const isProduction = process.env.NODE_ENV === 'production';
-  const logger = new CustomLogger('Bootstrap'); // Create an instance for bootstrap phase
-  logger.setLogLevels(
-    isProduction
-      ? ['log', 'warn', 'error']
-      : ['log', 'error', 'warn', 'debug', 'verbose'],
-  );
-
-  const app = await NestFactory.create(AppModule, {
-    // Pass the instance or enable specific levels globally
-    logger: isProduction
-      ? ['log', 'warn', 'error']
-      : ['log', 'error', 'warn', 'debug', 'verbose'],
-  });
-
-  // Replace the default logger instance used by the app
-  app.useLogger(app.get(CustomLogger));
+  const logger = new Logger('Bootstrap');
+  // Create app instance, logger will be injected via WinstonModule
+  const app = await NestFactory.create(AppModule);
 
   const configService = app.get(ConfigService);
 
@@ -85,13 +69,12 @@ async function bootstrap() {
     },
   });
 
-  const port = configService.get<number>('PORT', 3000);
+  const port = configService.get<number>('PORT', 3001);
   await app.listen(port);
 
-  // Use the logger instance obtained from the app context
-  const appLogger = app.get(CustomLogger);
-  appLogger.log(`Application is running on: http://localhost:${port}`);
-  appLogger.log(
+  // Get the logger instance from the app context for bootstrap messages
+  logger.log(`Application is running on: http://localhost:${port}`);
+  logger.log(
     `Swagger documentation is available at: http://localhost:${port}/api/docs`,
   );
 }

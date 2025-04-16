@@ -28,7 +28,6 @@ import { RequestWithUser } from '../types/request.types';
 @ApiBearerAuth()
 export class VoiceController {
   private readonly logger = new Logger(VoiceController.name);
-
   constructor(private readonly voiceService: VoiceService) {}
 
   @Post('process')
@@ -297,39 +296,6 @@ export class VoiceController {
         'Failed to fetch usage statistics',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
-    }
-  }
-
-  @Post('login/transcribe')
-  async transcribeLoginAudio(
-    @Body() data: { audioData: string; format: string },
-  ) {
-    this.logger.debug(
-      `Login transcribe request received. Format: ${data.format}`,
-    );
-    this.logger.debug(`Audio data length: ${data.audioData.length} characters`);
-
-    try {
-      const startTime = Date.now();
-      const transcript = await this.voiceService.transcribeAudio(
-        data.audioData,
-        data.format,
-      );
-      const duration = Date.now() - startTime;
-
-      this.logger.debug(`Login transcription completed in ${duration}ms`);
-      this.logger.debug(`Transcription result: ${transcript}`);
-
-      return { success: true, transcript };
-    } catch (error) {
-      this.logger.error(
-        'Login transcription error:',
-        error instanceof Error ? error.stack : 'Unknown error',
-      );
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Transcription failed',
-      };
     }
   }
 }

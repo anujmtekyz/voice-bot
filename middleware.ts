@@ -1,29 +1,47 @@
-import { NextResponse } from "next/server"
-import type { NextRequest } from "next/server"
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
-// This is a simplified auth check. In a real app, you would verify
-// the session token with your backend or auth provider.
+// Constants for token names matching those in lib/api.ts
+const REFRESH_TOKEN_COOKIE_NAME = "refresh_token";
+
+// Check if user is authenticated based on refresh token
 function isAuthenticated(request: NextRequest) {
-  const authCookie = request.cookies.get("auth_token")
-  return !!authCookie?.value
+  const refreshToken = request.cookies.get(REFRESH_TOKEN_COOKIE_NAME);
+  return !!refreshToken?.value;
 }
 
 export function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl
+  const { pathname } = request.nextUrl;
 
-  // If user is on the login page but already authenticated,
+  // Public paths that don't require authentication
+  const isPublicPath =
+    pathname === "/login" ||
+    pathname === "/forgot-password" ||
+    pathname === "/reset-password" ||
+    pathname === "/";
+
+  // If user is on a public page but already authenticated,
   // redirect to dashboard
-  if (pathname === "/login" && isAuthenticated(request)) {
-    return NextResponse.redirect(new URL("/dashboard", request.url))
+  if (isPublicPath && isAuthenticated(request)) {
+    return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
   // If user is trying to access protected routes but not authenticated,
   // redirect to login
-  if (pathname !== "/login" && !pathname.startsWith("/_next") && !pathname.includes(".") && !isAuthenticated(request)) {
-    return NextResponse.redirect(new URL("/login", request.url))
+  if (
+    !isPublicPath &&
+    !pathname.startsWith("/_next") &&
+    !pathname.includes(".") &&
+    !pathname.startsWith("/api") &&
+    !isAuthenticated(request)
+  ) {
+    // Save the original URL to redirect back after login
+    const url = new URL("/login", request.url);
+    url.searchParams.set("callbackUrl", encodeURI(request.nextUrl.pathname));
+    return NextResponse.redirect(url);
   }
 
-  return NextResponse.next()
+  return NextResponse.next();
 }
 
 // Configure middleware to run on specific paths
@@ -39,4 +57,4 @@ export const config = {
      */
     "/((?!api|_next|fonts|images|_vercel|[\\w-]+\\.\\w+).*)",
   ],
-}
+};

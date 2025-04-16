@@ -3,23 +3,20 @@
 import type React from "react"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { Mic, Loader2, Mail, Lock, Eye, EyeOff } from "lucide-react"
+import { Loader2, Mail, Lock, Eye, EyeOff, AlertCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { useToast } from "@/hooks/use-toast"
 import { useAuth } from "@/hooks/use-auth"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
 interface LoginFormProps {
-  onVoiceLoginToggle?: (active: boolean) => void
-  isVoiceLoginActive?: boolean
 }
 
-export function LoginForm({ onVoiceLoginToggle, isVoiceLoginActive = false }: LoginFormProps) {
-  const router = useRouter()
+export function LoginForm({}: LoginFormProps) {
   const { toast } = useToast()
   const { login, isLoading: authLoading } = useAuth()
   const [email, setEmail] = useState("")
@@ -27,6 +24,7 @@ export function LoginForm({ onVoiceLoginToggle, isVoiceLoginActive = false }: Lo
   const [showPassword, setShowPassword] = useState(false)
   const [rememberMe, setRememberMe] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [loginError, setLoginError] = useState<string | null>(null)
   const [errors, setErrors] = useState<{
     email?: string
     password?: string
@@ -56,33 +54,31 @@ export function LoginForm({ onVoiceLoginToggle, isVoiceLoginActive = false }: Lo
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setLoginError(null)
 
     if (!validateForm()) {
       return
     }
 
+    setIsLoading(true)
+
     try {
       // Use the auth hook's login method
       const success = await login({ email, password }, rememberMe)
       
+      // Only clear loading state if the login failed
       if (!success) {
+        setLoginError("Invalid email or password. Please check your credentials and try again.")
         setIsLoading(false)
       }
-      // Redirect is handled by the auth hook
+      // Redirect is handled by the auth hook on success
     } catch (error: any) {
       console.error("Login error:", error)
-      toast({
-        title: "Login failed",
-        description: error.response?.data?.message || "An unexpected error occurred. Please try again.",
-        variant: "destructive",
-      })
+      setLoginError(
+        error.response?.data?.message || 
+        "An unexpected error occurred. Please try again."
+      )
       setIsLoading(false)
-    }
-  }
-
-  const toggleVoiceLogin = () => {
-    if (onVoiceLoginToggle) {
-      onVoiceLoginToggle(!isVoiceLoginActive)
     }
   }
 
@@ -91,6 +87,15 @@ export function LoginForm({ onVoiceLoginToggle, isVoiceLoginActive = false }: Lo
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {loginError && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            {loginError}
+          </AlertDescription>
+        </Alert>
+      )}
+
       <div className="space-y-2">
         <Label htmlFor="email">
           Email
@@ -103,9 +108,12 @@ export function LoginForm({ onVoiceLoginToggle, isVoiceLoginActive = false }: Lo
             type="email"
             placeholder="you@example.com"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => {
+              setEmail(e.target.value)
+              setLoginError(null)
+            }}
             className={`pl-10 ${errors.email ? "border-destructive" : ""}`}
-            disabled={isFormLoading || isVoiceLoginActive}
+            disabled={isFormLoading}
           />
         </div>
       </div>
@@ -122,9 +130,12 @@ export function LoginForm({ onVoiceLoginToggle, isVoiceLoginActive = false }: Lo
             type={showPassword ? "text" : "password"}
             placeholder="••••••••"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => {
+              setPassword(e.target.value)
+              setLoginError(null)
+            }}
             className={`pl-10 ${errors.password ? "border-destructive" : ""}`}
-            disabled={isFormLoading || isVoiceLoginActive}
+            disabled={isFormLoading}
           />
           <Button
             type="button"
@@ -132,7 +143,7 @@ export function LoginForm({ onVoiceLoginToggle, isVoiceLoginActive = false }: Lo
             size="icon"
             className="absolute right-0 top-0 h-10 w-10 text-muted-foreground"
             onClick={() => setShowPassword(!showPassword)}
-            disabled={isFormLoading || isVoiceLoginActive}
+            disabled={isFormLoading}
           >
             {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             <span className="sr-only">{showPassword ? "Hide password" : "Show password"}</span>
@@ -146,7 +157,7 @@ export function LoginForm({ onVoiceLoginToggle, isVoiceLoginActive = false }: Lo
             id="remember-me"
             checked={rememberMe}
             onCheckedChange={(checked) => setRememberMe(checked as boolean)}
-            disabled={isFormLoading || isVoiceLoginActive}
+            disabled={isFormLoading}
           />
           <Label htmlFor="remember-me" className="text-sm font-normal">
             Remember me
@@ -157,23 +168,9 @@ export function LoginForm({ onVoiceLoginToggle, isVoiceLoginActive = false }: Lo
         </Link>
       </div>
 
-      <Button type="submit" className="w-full" disabled={isFormLoading || isVoiceLoginActive}>
+      <Button type="submit" className="w-full" disabled={isFormLoading}>
         {isFormLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
         {isFormLoading ? "Signing in..." : "Sign in"}
-      </Button>
-
-      <div className="relative">
-        <div className="absolute inset-0 flex items-center">
-          <span className="w-full border-t" />
-        </div>
-        <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
-        </div>
-      </div>
-
-      <Button type="button" variant="outline" className="w-full" onClick={toggleVoiceLogin} disabled={isFormLoading}>
-        <Mic className="mr-2 h-4 w-4" />
-        Voice Login
       </Button>
     </form>
   )

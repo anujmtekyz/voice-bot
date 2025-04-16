@@ -1,5 +1,4 @@
 import { Module, Global } from '@nestjs/common';
-import { LoggerService } from './services/logger.service';
 
 /**
  * Global module providing common services
@@ -8,7 +7,7 @@ import { LoggerService } from './services/logger.service';
  */
 @Global()
 @Module({
-  providers: [LoggerService],
-  exports: [LoggerService],
+  providers: [],
+  exports: [],
 })
 export class CommonModule {}

@@ -1,10 +1,13 @@
 /**
- * Interface for OpenAI client transcription functionality
+ * Interface for OpenAI client
  */
 export interface IOpenAIClient {
   audio: {
     transcriptions: {
       create(params: any): Promise<{ text: string }>;
+    };
+    speech: {
+      create(params: any): Promise<any>;
     };
   };
 }
